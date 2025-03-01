@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Streamlined CMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Websites</h1>
+    {% if current_user.is_admin() %}
+    <a href="{{ url_for('content.new_website') }}" class="btn btn-primary">Add New Website</a>
+    {% endif %}
+</div>
+
+{% if websites %}
+<div class="row">
+    {% for website in websites %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card dashboard-card website-card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ website.name }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">{{ website.domain }}</h6>
+                <p class="card-text">
+                    <small class="text-muted">Created: {{ website.created_at.strftime('%Y-%m-%d') }}</small><br>
+                    <small class="text-muted">Updated: {{ website.updated_at.strftime('%Y-%m-%d') }}</small><br>
+                    <small class="text-muted">Pages: {{ website.pages.count() }}</small>
+                </p>
+            </div>
+            <div class="card-footer bg-transparent">
+                <a href="{{ url_for('content.website_detail', website_id=website.id) }}" class="btn btn-sm btn-primary">Manage Pages</a>
+                <a href="{{ url_for('analytics.website_stats', website_id=website.id) }}" class="btn btn-sm btn-info">Analytics</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">
+    <p>No websites found. Create a new website to get started.</p>
+    {% if current_user.is_admin() %}
+    <a href="{{ url_for('content.new_website') }}" class="btn btn-primary">Add New Website</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

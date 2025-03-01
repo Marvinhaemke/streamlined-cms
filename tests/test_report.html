@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title id="head-title">test_report.html</title>
+      <style type="text/css">body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  /* do not increase min-width as some may use split screens */
+  min-width: 800px;
+  color: #999;
+}
+
+h1 {
+  font-size: 24px;
+  color: black;
+}
+
+h2 {
+  font-size: 16px;
+  color: black;
+}
+
+p {
+  color: black;
+}
+
+a {
+  color: #999;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+/******************************
+ * SUMMARY INFORMATION
+ ******************************/
+#environment td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  vertical-align: top;
+}
+#environment tr:nth-child(odd) {
+  background-color: #f6f6f6;
+}
+#environment ul {
+  margin: 0;
+  padding: 0 20px;
+}
+
+/******************************
+ * TEST RESULT COLORS
+ ******************************/
+span.passed,
+.passed .col-result {
+  color: green;
+}
+
+span.skipped,
+span.xfailed,
+span.rerun,
+.skipped .col-result,
+.xfailed .col-result,
+.rerun .col-result {
+  color: orange;
+}
+
+span.error,
+span.failed,
+span.xpassed,
+.error .col-result,
+.failed .col-result,
+.xpassed .col-result {
+  color: red;
+}
+
+.col-links__extra {
+  margin-right: 3px;
+}
+
+/******************************
+ * RESULTS TABLE
+ *
+ * 1. Table Layout
+ * 2. Extra
+ * 3. Sorting items
+ *
+ ******************************/
+/*------------------
+ * 1. Table Layout
+ *------------------*/
+#results-table {
+  border: 1px solid #e6e6e6;
+  color: #999;
+  font-size: 12px;
+  width: 100%;
+}
+#results-table th,
+#results-table td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  text-align: left;
+}
+#results-table th {
+  font-weight: bold;
+}
+
+/*------------------
+ * 2. Extra
+ *------------------*/
+.logwrapper {
+  max-height: 230px;
+  overflow-y: scroll;
+  background-color: #e6e6e6;
+}
+.logwrapper.expanded {
+  max-height: none;
+}
+.logwrapper.expanded .logexpander:after {
+  content: "collapse [-]";
+}
+.logwrapper .logexpander {
+  z-index: 1;
+  position: sticky;
+  top: 10px;
+  width: max-content;
+  border: 1px solid;
+  border-radius: 3px;
+  padding: 5px 7px;
+  margin: 10px 0 10px calc(100% - 80px);
+  cursor: pointer;
+  background-color: #e6e6e6;
+}
+.logwrapper .logexpander:after {
+  content: "expand [+]";
+}
+.logwrapper .logexpander:hover {
+  color: #000;
+  border-color: #000;
+}
+.logwrapper .log {
+  min-height: 40px;
+  position: relative;
+  top: -50px;
+  height: calc(100% + 50px);
+  border: 1px solid #e6e6e6;
+  color: black;
+  display: block;
+  font-family: "Courier New", Courier, monospace;
+  padding: 5px;
+  padding-right: 80px;
+  white-space: pre-wrap;
+}
+
+div.media {
+  border: 1px solid #e6e6e6;
+  float: right;
+  height: 240px;
+  margin: 0 5px;
+  overflow: hidden;
+  width: 320px;
+}
+
+.media-container {
+  display: grid;
+  grid-template-columns: 25px auto 25px;
+  align-items: center;
+  flex: 1 1;
+  overflow: hidden;
+  height: 200px;
+}
+
+.media-container--fullscreen {
+  grid-template-columns: 0px auto 0px;
+}
+
+.media-container__nav--right,
+.media-container__nav--left {
+  text-align: center;
+  cursor: pointer;
+}
+
+.media-container__viewport {
+  cursor: pointer;
+  text-align: center;
+  height: inherit;
+}
+.media-container__viewport img,
+.media-container__viewport video {
+  object-fit: cover;
+  width: 100%;
+  max-height: 100%;
+}
+
+.media__name,
+.media__counter {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  flex: 0 0 25px;
+  align-items: center;
+}
+
+.collapsible td:not(.col-links) {
+  cursor: pointer;
+}
+.collapsible td:not(.col-links):hover::after {
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+}
+
+.col-result {
+  width: 130px;
+}
+.col-result:hover::after {
+  content: " (hide details)";
+}
+
+.col-result.collapsed:hover::after {
+  content: " (show details)";
+}
+
+#environment-header h2:hover::after {
+  content: " (hide details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+#environment-header.collapsed h2:hover::after {
+  content: " (show details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/*------------------
+ * 3. Sorting items
+ *------------------*/
+.sortable {
+  cursor: pointer;
+}
+.sortable.desc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: -12.5px;
+  border: 10px solid #4caf50;
+  border-bottom: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+.sortable.asc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: 12.5px;
+  border: 10px solid #4caf50;
+  border-top: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+
+.hidden, .summary__reload__button.hidden {
+  display: none;
+}
+
+.summary__data {
+  flex: 0 0 550px;
+}
+.summary__reload {
+  flex: 1 1;
+  display: flex;
+  justify-content: center;
+}
+.summary__reload__button {
+  flex: 0 0 300px;
+  display: flex;
+  color: white;
+  font-weight: bold;
+  background-color: #4caf50;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.summary__reload__button:hover {
+  background-color: #46a049;
+}
+.summary__spacer {
+  flex: 0 0 550px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+}
+
+.filters,
+.collapse {
+  display: flex;
+  align-items: center;
+}
+.filters button,
+.collapse button {
+  color: #999;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.filters button:hover,
+.collapse button:hover {
+  color: #ccc;
+}
+
+.filter__label {
+  margin-right: 10px;
+}
+
+      </style>
+    
+  </head>
+  <body>
+    <h1 id="title">test_report.html</h1>
+    <p>Report generated on 01-Mar-2025 at 17:42:26 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a>
+        v4.1.1</p>
+    <div id="environment-header">
+      <h2>Environment</h2>
+    </div>
+    <table id="environment"></table>
+    <!-- TEMPLATES -->
+      <template id="template_environment_row">
+      <tr>
+        <td></td>
+        <td></td>
+      </tr>
+    </template>
+    <template id="template_results-table__body--empty">
+      <tbody class="results-table-row">
+        <tr id="not-found-message">
+          <td colspan="4">No results found. Check the filters.</th>
+        </tr>
+    </template>
+    <template id="template_results-table__tbody">
+      <tbody class="results-table-row">
+        <tr class="collapsible">
+        </tr>
+        <tr class="extras-row">
+          <td class="extra" colspan="4">
+            <div class="extraHTML"></div>
+            <div class="media">
+              <div class="media-container">
+                  <div class="media-container__nav--left"><</div>
+                  <div class="media-container__viewport">
+                    <img src="" />
+                    <video controls>
+                      <source src="" type="video/mp4">
+                    </video>
+                  </div>
+                  <div class="media-container__nav--right">></div>
+                </div>
+                <div class="media__name"></div>
+                <div class="media__counter"></div>
+            </div>
+            <div class="logwrapper">
+              <div class="logexpander"></div>
+              <div class="log"></div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </template>
+    <!-- END TEMPLATES -->
+    <div class="summary">
+      <div class="summary__data">
+        <h2>Summary</h2>
+        <div class="additional-summary prefix">
+        </div>
+        <p class="run-count">46 tests took 00:00:32.</p>
+        <p class="filter">(Un)check the boxes to filter the results.</p>
+        <div class="summary__reload">
+          <div class="summary__reload__button hidden" onclick="location.reload()">
+            <div>There are still tests running. <br />Reload this page to get the latest results!</div>
+          </div>
+        </div>
+        <div class="summary__spacer"></div>
+        <div class="controls">
+          <div class="filters">
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="failed" />
+            <span class="failed">33 Failed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="passed" />
+            <span class="passed">13 Passed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="skipped" disabled/>
+            <span class="skipped">0 Skipped,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xfailed" disabled/>
+            <span class="xfailed">0 Expected failures,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xpassed" disabled/>
+            <span class="xpassed">0 Unexpected passes,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="error" disabled/>
+            <span class="error">0 Errors,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="rerun" disabled/>
+            <span class="rerun">0 Reruns</span>
+          </div>
+          <div class="collapse">
+            <button id="show_all_details">Show all details</button>&nbsp;/&nbsp;<button id="hide_all_details">Hide all details</button>
+          </div>
+        </div>
+      </div>
+      <div class="additional-summary summary">
+      </div>
+      <div class="additional-summary postfix">
+      </div>
+    </div>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable" data-column-type="result">Result</th>
+          <th class="sortable" data-column-type="testId">Test</th>
+          <th class="sortable" data-column-type="duration">Duration</th>
+          <th>Links</th>
+        </tr>
+      </thead>
+    </table>
+  </body>
+  <footer>
+    <div id="data-container" data-jsonblob="{&#34;environment&#34;: {&#34;Python&#34;: &#34;3.12.6&#34;, &#34;Platform&#34;: &#34;Windows-11-10.0.22631-SP0&#34;, &#34;Packages&#34;: {&#34;pytest&#34;: &#34;7.4.3&#34;, &#34;pluggy&#34;: &#34;1.5.0&#34;}, &#34;Plugins&#34;: {&#34;cov&#34;: &#34;4.1.0&#34;, &#34;flask&#34;: &#34;1.3.0&#34;, &#34;html&#34;: &#34;4.1.1&#34;, &#34;metadata&#34;: &#34;3.1.1&#34;}}, &#34;tests&#34;: {&#34;tests/test_analytics.py::test_record_page_view&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_analytics.py::test_record_page_view&#34;, &#34;duration&#34;: &#34;687 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_analytics.py::test_record_page_view&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;687 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_analytics.py::test_anonymize_ip&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_analytics.py::test_anonymize_ip&#34;, &#34;duration&#34;: &#34;1 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_analytics.py::test_anonymize_ip&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;1 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_analytics.py::test_get_page_views_by_date&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_analytics.py::test_get_page_views_by_date&#34;, &#34;duration&#34;: &#34;602 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_analytics.py::test_get_page_views_by_date&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;602 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_analytics.py::test_get_test_results&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_analytics.py::test_get_test_results&#34;, &#34;duration&#34;: &#34;600 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_analytics.py::test_get_test_results&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;600 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_analytics.py::test_get_website_stats&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_analytics.py::test_get_website_stats&#34;, &#34;duration&#34;: &#34;596 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_analytics.py::test_get_website_stats&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;596 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;app = &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;\n\n    def test_get_website_stats(app):\n        &amp;quot;&amp;quot;&amp;quot;Test getting overall website statistics.&amp;quot;&amp;quot;&amp;quot;\n        with app.app_context():\n            from app import db\n    \n            # Add some page views for different pages\n            website_id = 1\n    \n            # Add views for each page\n            page_ids = [1, 2, 3]  # Home, About, Contact\n    \n            for page_id in page_ids:\n                for i in range(page_id * 10):  # Different number for each page\n                    view = PageView(\n                        page_id=page_id,\n                        visitor_id=f&amp;quot;stats_visitor_{page_id}_{i % 5}&amp;quot;,  # Some duplicates\n                        created_at=datetime.utcnow() - timedelta(days=i % 3)\n                    )\n                    db.session.add(view)\n    \n            db.session.commit()\n    \n            # Get website stats\n            stats = get_website_stats(website_id, days=7)\n    \n            assert stats is not None\n            assert &amp;#x27;total_views&amp;#x27; in stats\n            assert &amp;#x27;unique_visitors&amp;#x27; in stats\n            assert &amp;#x27;views_by_page&amp;#x27; in stats\n            assert &amp;#x27;views_by_date&amp;#x27; in stats\n    \n            assert stats[&amp;#x27;total_views&amp;#x27;] == 10 + 20 + 30  # Sum of all page views\n            assert stats[&amp;#x27;unique_visitors&amp;#x27;] &amp;lt;= stats[&amp;#x27;total_views&amp;#x27;]  # Should be fewer unique visitors\n    \n            # Check views by page\n            assert len(stats[&amp;#x27;views_by_page&amp;#x27;]) == 3\n&amp;gt;           assert stats[&amp;#x27;views_by_page&amp;#x27;].get(&amp;#x27;1&amp;#x27;) == 10\nE           AssertionError: assert None == 10\nE            +  where None = &amp;lt;built-in method get of dict object at 0x000002597ED34EC0&amp;gt;(&amp;#x27;1&amp;#x27;)\nE            +    where &amp;lt;built-in method get of dict object at 0x000002597ED34EC0&amp;gt; = {1: 10, 2: 20, 3: 30}.get\n\ntests\\test_analytics.py:210: AssertionError\n&#34;}], &#34;tests/test_analytics.py::test_analytics_dashboard&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_analytics.py::test_analytics_dashboard&#34;, &#34;duration&#34;: &#34;787 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_analytics.py::test_analytics_dashboard&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;787 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;, auth = &amp;lt;conftest.auth.&amp;lt;locals&amp;gt;.AuthActions object at 0x000002597F1436B0&amp;gt;\n\n    def test_analytics_dashboard(client, auth):\n        &amp;quot;&amp;quot;&amp;quot;Test analytics dashboard page.&amp;quot;&amp;quot;&amp;quot;\n        auth.login()\n&amp;gt;       response = client.get(&amp;#x27;/analytics/dashboard&amp;#x27;)\n\ntests\\test_analytics.py:221: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \nvenv\\Lib\\site-packages\\werkzeug\\test.py:1243: in get\n    return self.open(*args, **kw)\nvenv\\Lib\\site-packages\\flask\\testing.py:232: in open\n    response = super().open(\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1197: in open\n    response = self.run_wsgi_app(request.environ, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1069: in run_wsgi_app\n    rv = run_wsgi_app(self.application, environ, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1345: in run_wsgi_app\n    app_rv = app(environ, start_response)\nvenv\\Lib\\site-packages\\flask\\app.py:2213: in __call__\n    return self.wsgi_app(environ, start_response)\nvenv\\Lib\\site-packages\\flask\\app.py:2193: in wsgi_app\n    response = self.handle_exception(e)\nvenv\\Lib\\site-packages\\flask\\app.py:2190: in wsgi_app\n    response = self.full_dispatch_request()\nvenv\\Lib\\site-packages\\flask\\app.py:1486: in full_dispatch_request\n    rv = self.handle_user_exception(e)\nvenv\\Lib\\site-packages\\flask\\app.py:1484: in full_dispatch_request\n    rv = self.dispatch_request()\nvenv\\Lib\\site-packages\\flask\\app.py:1469: in dispatch_request\n    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)\nvenv\\Lib\\site-packages\\flask_login\\utils.py:290: in decorated_view\n    return current_app.ensure_sync(func)(*args, **kwargs)\napp\\analytics\\routes.py:24: in dashboard\n    return render_template(&amp;#x27;analytics/dashboard.html&amp;#x27;, title=&amp;#x27;Analytics Dashboard&amp;#x27;,\nvenv\\Lib\\site-packages\\flask\\templating.py:150: in render_template\n    template = app.jinja_env.get_or_select_template(template_name_or_list)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:1087: in get_or_select_template\n    return self.get_template(template_name_or_list, parent, globals)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:1016: in get_template\n    return self._load_template(name, globals)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:975: in _load_template\n    template = self.loader.load(self, name, self.make_globals(globals))\nvenv\\Lib\\site-packages\\jinja2\\loaders.py:126: in load\n    source, filename, uptodate = self.get_source(environment, name)\nvenv\\Lib\\site-packages\\flask\\templating.py:64: in get_source\n    return self._get_source_fast(environment, template)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = &amp;lt;flask.templating.DispatchingJinjaLoader object at 0x000002597F065A30&amp;gt;, environment = &amp;lt;flask.templating.Environment object at 0x000002597F0659D0&amp;gt;\ntemplate = &amp;#x27;analytics/dashboard.html&amp;#x27;\n\n    def _get_source_fast(\n        self, environment: Environment, template: str\n    ) -&amp;gt; tuple[str, str | None, t.Callable | None]:\n        for _srcobj, loader in self._iter_loaders(template):\n            try:\n                return loader.get_source(environment, template)\n            except TemplateNotFound:\n                continue\n&amp;gt;       raise TemplateNotFound(template)\nE       jinja2.exceptions.TemplateNotFound: analytics/dashboard.html\n\nvenv\\Lib\\site-packages\\flask\\templating.py:98: TemplateNotFound\n&#34;}], &#34;tests/test_analytics.py::test_website_stats_page&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_analytics.py::test_website_stats_page&#34;, &#34;duration&#34;: &#34;781 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_analytics.py::test_website_stats_page&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;781 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;, auth = &amp;lt;conftest.auth.&amp;lt;locals&amp;gt;.AuthActions object at 0x000002597F1B6C00&amp;gt;\n\n    def test_website_stats_page(client, auth):\n        &amp;quot;&amp;quot;&amp;quot;Test website stats page.&amp;quot;&amp;quot;&amp;quot;\n        auth.login()\n&amp;gt;       response = client.get(&amp;#x27;/analytics/website/1&amp;#x27;)\n\ntests\\test_analytics.py:230: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \nvenv\\Lib\\site-packages\\werkzeug\\test.py:1243: in get\n    return self.open(*args, **kw)\nvenv\\Lib\\site-packages\\flask\\testing.py:232: in open\n    response = super().open(\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1197: in open\n    response = self.run_wsgi_app(request.environ, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1069: in run_wsgi_app\n    rv = run_wsgi_app(self.application, environ, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1345: in run_wsgi_app\n    app_rv = app(environ, start_response)\nvenv\\Lib\\site-packages\\flask\\app.py:2213: in __call__\n    return self.wsgi_app(environ, start_response)\nvenv\\Lib\\site-packages\\flask\\app.py:2193: in wsgi_app\n    response = self.handle_exception(e)\nvenv\\Lib\\site-packages\\flask\\app.py:2190: in wsgi_app\n    response = self.full_dispatch_request()\nvenv\\Lib\\site-packages\\flask\\app.py:1486: in full_dispatch_request\n    rv = self.handle_user_exception(e)\nvenv\\Lib\\site-packages\\flask\\app.py:1484: in full_dispatch_request\n    rv = self.dispatch_request()\nvenv\\Lib\\site-packages\\flask\\app.py:1469: in dispatch_request\n    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)\nvenv\\Lib\\site-packages\\flask_login\\utils.py:290: in decorated_view\n    return current_app.ensure_sync(func)(*args, **kwargs)\napp\\analytics\\routes.py:42: in website_stats\n    return render_template(&amp;#x27;analytics/website_stats.html&amp;#x27;, title=f&amp;#x27;Analytics for {website.name}&amp;#x27;,\nvenv\\Lib\\site-packages\\flask\\templating.py:150: in render_template\n    template = app.jinja_env.get_or_select_template(template_name_or_list)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:1087: in get_or_select_template\n    return self.get_template(template_name_or_list, parent, globals)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:1016: in get_template\n    return self._load_template(name, globals)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:975: in _load_template\n    template = self.loader.load(self, name, self.make_globals(globals))\nvenv\\Lib\\site-packages\\jinja2\\loaders.py:126: in load\n    source, filename, uptodate = self.get_source(environment, name)\nvenv\\Lib\\site-packages\\flask\\templating.py:64: in get_source\n    return self._get_source_fast(environment, template)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = &amp;lt;flask.templating.DispatchingJinjaLoader object at 0x000002597F2B4530&amp;gt;, environment = &amp;lt;flask.templating.Environment object at 0x000002597F2B44D0&amp;gt;\ntemplate = &amp;#x27;analytics/website_stats.html&amp;#x27;\n\n    def _get_source_fast(\n        self, environment: Environment, template: str\n    ) -&amp;gt; tuple[str, str | None, t.Callable | None]:\n        for _srcobj, loader in self._iter_loaders(template):\n            try:\n                return loader.get_source(environment, template)\n            except TemplateNotFound:\n                continue\n&amp;gt;       raise TemplateNotFound(template)\nE       jinja2.exceptions.TemplateNotFound: analytics/website_stats.html\n\nvenv\\Lib\\site-packages\\flask\\templating.py:98: TemplateNotFound\n&#34;}], &#34;tests/test_analytics.py::test_page_stats_page&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_analytics.py::test_page_stats_page&#34;, &#34;duration&#34;: &#34;791 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_analytics.py::test_page_stats_page&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;791 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;, auth = &amp;lt;conftest.auth.&amp;lt;locals&amp;gt;.AuthActions object at 0x000002597F602090&amp;gt;\n\n    def test_page_stats_page(client, auth):\n        &amp;quot;&amp;quot;&amp;quot;Test page stats page.&amp;quot;&amp;quot;&amp;quot;\n        auth.login()\n&amp;gt;       response = client.get(&amp;#x27;/analytics/page/1&amp;#x27;)\n\ntests\\test_analytics.py:239: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \nvenv\\Lib\\site-packages\\werkzeug\\test.py:1243: in get\n    return self.open(*args, **kw)\nvenv\\Lib\\site-packages\\flask\\testing.py:232: in open\n    response = super().open(\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1197: in open\n    response = self.run_wsgi_app(request.environ, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1069: in run_wsgi_app\n    rv = run_wsgi_app(self.application, environ, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1345: in run_wsgi_app\n    app_rv = app(environ, start_response)\nvenv\\Lib\\site-packages\\flask\\app.py:2213: in __call__\n    return self.wsgi_app(environ, start_response)\nvenv\\Lib\\site-packages\\flask\\app.py:2193: in wsgi_app\n    response = self.handle_exception(e)\nvenv\\Lib\\site-packages\\flask\\app.py:2190: in wsgi_app\n    response = self.full_dispatch_request()\nvenv\\Lib\\site-packages\\flask\\app.py:1486: in full_dispatch_request\n    rv = self.handle_user_exception(e)\nvenv\\Lib\\site-packages\\flask\\app.py:1484: in full_dispatch_request\n    rv = self.dispatch_request()\nvenv\\Lib\\site-packages\\flask\\app.py:1469: in dispatch_request\n    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)\nvenv\\Lib\\site-packages\\flask_login\\utils.py:290: in decorated_view\n    return current_app.ensure_sync(func)(*args, **kwargs)\napp\\analytics\\routes.py:76: in page_stats\n    return render_template(&amp;#x27;analytics/page_stats.html&amp;#x27;, title=f&amp;#x27;Analytics for {page.title}&amp;#x27;,\nvenv\\Lib\\site-packages\\flask\\templating.py:150: in render_template\n    template = app.jinja_env.get_or_select_template(template_name_or_list)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:1087: in get_or_select_template\n    return self.get_template(template_name_or_list, parent, globals)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:1016: in get_template\n    return self._load_template(name, globals)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:975: in _load_template\n    template = self.loader.load(self, name, self.make_globals(globals))\nvenv\\Lib\\site-packages\\jinja2\\loaders.py:126: in load\n    source, filename, uptodate = self.get_source(environment, name)\nvenv\\Lib\\site-packages\\flask\\templating.py:64: in get_source\n    return self._get_source_fast(environment, template)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = &amp;lt;flask.templating.DispatchingJinjaLoader object at 0x000002597F1D7B60&amp;gt;, environment = &amp;lt;flask.templating.Environment object at 0x000002597F1D7B00&amp;gt;\ntemplate = &amp;#x27;analytics/page_stats.html&amp;#x27;\n\n    def _get_source_fast(\n        self, environment: Environment, template: str\n    ) -&amp;gt; tuple[str, str | None, t.Callable | None]:\n        for _srcobj, loader in self._iter_loaders(template):\n            try:\n                return loader.get_source(environment, template)\n            except TemplateNotFound:\n                continue\n&amp;gt;       raise TemplateNotFound(template)\nE       jinja2.exceptions.TemplateNotFound: analytics/page_stats.html\n\nvenv\\Lib\\site-packages\\flask\\templating.py:98: TemplateNotFound\n&#34;}], &#34;tests/test_analytics.py::test_test_stats_page&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_analytics.py::test_test_stats_page&#34;, &#34;duration&#34;: &#34;779 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_analytics.py::test_test_stats_page&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;779 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;, auth = &amp;lt;conftest.auth.&amp;lt;locals&amp;gt;.AuthActions object at 0x000002597F36E1E0&amp;gt;\n\n    def test_test_stats_page(client, auth):\n        &amp;quot;&amp;quot;&amp;quot;Test test stats page.&amp;quot;&amp;quot;&amp;quot;\n        auth.login()\n&amp;gt;       response = client.get(&amp;#x27;/analytics/test/1&amp;#x27;)\n\ntests\\test_analytics.py:248: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \nvenv\\Lib\\site-packages\\werkzeug\\test.py:1243: in get\n    return self.open(*args, **kw)\nvenv\\Lib\\site-packages\\flask\\testing.py:232: in open\n    response = super().open(\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1197: in open\n    response = self.run_wsgi_app(request.environ, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1069: in run_wsgi_app\n    rv = run_wsgi_app(self.application, environ, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1345: in run_wsgi_app\n    app_rv = app(environ, start_response)\nvenv\\Lib\\site-packages\\flask\\app.py:2213: in __call__\n    return self.wsgi_app(environ, start_response)\nvenv\\Lib\\site-packages\\flask\\app.py:2193: in wsgi_app\n    response = self.handle_exception(e)\nvenv\\Lib\\site-packages\\flask\\app.py:2190: in wsgi_app\n    response = self.full_dispatch_request()\nvenv\\Lib\\site-packages\\flask\\app.py:1486: in full_dispatch_request\n    rv = self.handle_user_exception(e)\nvenv\\Lib\\site-packages\\flask\\app.py:1484: in full_dispatch_request\n    rv = self.dispatch_request()\nvenv\\Lib\\site-packages\\flask\\app.py:1469: in dispatch_request\n    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)\nvenv\\Lib\\site-packages\\flask_login\\utils.py:290: in decorated_view\n    return current_app.ensure_sync(func)(*args, **kwargs)\napp\\analytics\\routes.py:91: in test_stats\n    return render_template(&amp;#x27;analytics/test_stats.html&amp;#x27;, title=f&amp;#x27;Results for {test_results[&amp;quot;test&amp;quot;].name}&amp;#x27;,\nvenv\\Lib\\site-packages\\flask\\templating.py:150: in render_template\n    template = app.jinja_env.get_or_select_template(template_name_or_list)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:1087: in get_or_select_template\n    return self.get_template(template_name_or_list, parent, globals)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:1016: in get_template\n    return self._load_template(name, globals)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:975: in _load_template\n    template = self.loader.load(self, name, self.make_globals(globals))\nvenv\\Lib\\site-packages\\jinja2\\loaders.py:126: in load\n    source, filename, uptodate = self.get_source(environment, name)\nvenv\\Lib\\site-packages\\flask\\templating.py:64: in get_source\n    return self._get_source_fast(environment, template)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = &amp;lt;flask.templating.DispatchingJinjaLoader object at 0x000002597F637500&amp;gt;, environment = &amp;lt;flask.templating.Environment object at 0x000002597F6374A0&amp;gt;\ntemplate = &amp;#x27;analytics/test_stats.html&amp;#x27;\n\n    def _get_source_fast(\n        self, environment: Environment, template: str\n    ) -&amp;gt; tuple[str, str | None, t.Callable | None]:\n        for _srcobj, loader in self._iter_loaders(template):\n            try:\n                return loader.get_source(environment, template)\n            except TemplateNotFound:\n                continue\n&amp;gt;       raise TemplateNotFound(template)\nE       jinja2.exceptions.TemplateNotFound: analytics/test_stats.html\n\nvenv\\Lib\\site-packages\\flask\\templating.py:98: TemplateNotFound\n&#34;}], &#34;tests/test_analytics.py::test_api_record_view&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_analytics.py::test_api_record_view&#34;, &#34;duration&#34;: &#34;609 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_analytics.py::test_api_record_view&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;609 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;\n\n    def test_api_record_view(client):\n        &amp;quot;&amp;quot;&amp;quot;Test API endpoint to record a page view.&amp;quot;&amp;quot;&amp;quot;\n        response = client.post(\n            &amp;#x27;/api/page_view&amp;#x27;,\n            json={&amp;#x27;page_id&amp;#x27;: 1}\n        )\n    \n&amp;gt;       assert response.status_code == 200\nE       assert 404 == 200\nE        +  where 404 = &amp;lt;WrapperTestResponse streamed [404 NOT FOUND]&amp;gt;.status_code\n\ntests\\test_analytics.py:261: AssertionError\n&#34;}], &#34;tests/test_analytics.py::test_export_test_data&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_analytics.py::test_export_test_data&#34;, &#34;duration&#34;: &#34;788 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_analytics.py::test_export_test_data&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;788 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;, auth = &amp;lt;conftest.auth.&amp;lt;locals&amp;gt;.AuthActions object at 0x000002597F2D14C0&amp;gt;\n\n    def test_export_test_data(client, auth):\n        &amp;quot;&amp;quot;&amp;quot;Test exporting test data as CSV.&amp;quot;&amp;quot;&amp;quot;\n        auth.login()\n        response = client.get(&amp;#x27;/analytics/export/test/1&amp;#x27;)\n    \n        assert response.status_code == 200\n&amp;gt;       assert response.headers.get(&amp;#x27;Content-Type&amp;#x27;) == &amp;#x27;text/csv&amp;#x27;\nE       AssertionError: assert &amp;#x27;text/csv; charset=utf-8&amp;#x27; == &amp;#x27;text/csv&amp;#x27;\nE         - text/csv\nE         + text/csv; charset=utf-8\n\ntests\\test_analytics.py:272: AssertionError\n&#34;}], &#34;tests/test_analytics.py::test_access_control&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_analytics.py::test_access_control&#34;, &#34;duration&#34;: &#34;829 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_analytics.py::test_access_control&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;829 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;, auth = &amp;lt;conftest.auth.&amp;lt;locals&amp;gt;.AuthActions object at 0x000002597F3356A0&amp;gt;\n\n    def test_access_control(client, auth):\n        &amp;quot;&amp;quot;&amp;quot;Test that analytics pages require authentication.&amp;quot;&amp;quot;&amp;quot;\n        # Without login\n        response = client.get(&amp;#x27;/analytics/dashboard&amp;#x27;)\n        assert response.status_code == 302  # Redirect to login\n    \n        # With login\n        auth.login()\n&amp;gt;       response = client.get(&amp;#x27;/analytics/dashboard&amp;#x27;)\n\ntests\\test_analytics.py:291: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \nvenv\\Lib\\site-packages\\werkzeug\\test.py:1243: in get\n    return self.open(*args, **kw)\nvenv\\Lib\\site-packages\\flask\\testing.py:232: in open\n    response = super().open(\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1197: in open\n    response = self.run_wsgi_app(request.environ, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1069: in run_wsgi_app\n    rv = run_wsgi_app(self.application, environ, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1345: in run_wsgi_app\n    app_rv = app(environ, start_response)\nvenv\\Lib\\site-packages\\flask\\app.py:2213: in __call__\n    return self.wsgi_app(environ, start_response)\nvenv\\Lib\\site-packages\\flask\\app.py:2193: in wsgi_app\n    response = self.handle_exception(e)\nvenv\\Lib\\site-packages\\flask\\app.py:2190: in wsgi_app\n    response = self.full_dispatch_request()\nvenv\\Lib\\site-packages\\flask\\app.py:1486: in full_dispatch_request\n    rv = self.handle_user_exception(e)\nvenv\\Lib\\site-packages\\flask\\app.py:1484: in full_dispatch_request\n    rv = self.dispatch_request()\nvenv\\Lib\\site-packages\\flask\\app.py:1469: in dispatch_request\n    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)\nvenv\\Lib\\site-packages\\flask_login\\utils.py:290: in decorated_view\n    return current_app.ensure_sync(func)(*args, **kwargs)\napp\\analytics\\routes.py:24: in dashboard\n    return render_template(&amp;#x27;analytics/dashboard.html&amp;#x27;, title=&amp;#x27;Analytics Dashboard&amp;#x27;,\nvenv\\Lib\\site-packages\\flask\\templating.py:150: in render_template\n    template = app.jinja_env.get_or_select_template(template_name_or_list)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:1087: in get_or_select_template\n    return self.get_template(template_name_or_list, parent, globals)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:1016: in get_template\n    return self._load_template(name, globals)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:975: in _load_template\n    template = self.loader.load(self, name, self.make_globals(globals))\nvenv\\Lib\\site-packages\\jinja2\\loaders.py:126: in load\n    source, filename, uptodate = self.get_source(environment, name)\nvenv\\Lib\\site-packages\\flask\\templating.py:64: in get_source\n    return self._get_source_fast(environment, template)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = &amp;lt;flask.templating.DispatchingJinjaLoader object at 0x000002597F2CF1D0&amp;gt;, environment = &amp;lt;flask.templating.Environment object at 0x000002597F2CC050&amp;gt;\ntemplate = &amp;#x27;analytics/dashboard.html&amp;#x27;\n\n    def _get_source_fast(\n        self, environment: Environment, template: str\n    ) -&amp;gt; tuple[str, str | None, t.Callable | None]:\n        for _srcobj, loader in self._iter_loaders(template):\n            try:\n                return loader.get_source(environment, template)\n            except TemplateNotFound:\n                continue\n&amp;gt;       raise TemplateNotFound(template)\nE       jinja2.exceptions.TemplateNotFound: analytics/dashboard.html\n\nvenv\\Lib\\site-packages\\flask\\templating.py:98: TemplateNotFound\n&#34;}], &#34;tests/test_auth.py::test_login_page&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_auth.py::test_login_page&#34;, &#34;duration&#34;: &#34;607 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_auth.py::test_login_page&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;607 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_auth.py::test_login_success&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_auth.py::test_login_success&#34;, &#34;duration&#34;: &#34;781 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_auth.py::test_login_success&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;781 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;, auth = &amp;lt;conftest.auth.&amp;lt;locals&amp;gt;.AuthActions object at 0x000002597F16BBC0&amp;gt;\n\n    def test_login_success(client, auth):\n        &amp;quot;&amp;quot;&amp;quot;Test successful login.&amp;quot;&amp;quot;&amp;quot;\n        response = auth.login()\n&amp;gt;       assert response.headers.get(&amp;#x27;Location&amp;#x27;) == &amp;#x27;http://localhost/content/dashboard&amp;#x27;\nE       AssertionError: assert &amp;#x27;/content/dashboard&amp;#x27; == &amp;#x27;http://local...ent/dashboard&amp;#x27;\nE         - http://localhost/content/dashboard\nE         + /content/dashboard\n\ntests\\test_auth.py:20: AssertionError\n&#34;}], &#34;tests/test_auth.py::test_login_incorrect_password&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_auth.py::test_login_incorrect_password&#34;, &#34;duration&#34;: &#34;777 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_auth.py::test_login_incorrect_password&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;777 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;\n\n    def test_login_incorrect_password(client):\n        &amp;quot;&amp;quot;&amp;quot;Test login with incorrect password.&amp;quot;&amp;quot;&amp;quot;\n        response = client.post(\n            &amp;#x27;/auth/login&amp;#x27;,\n            data={&amp;#x27;username&amp;#x27;: &amp;#x27;admin&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;wrongpassword&amp;#x27;}\n        )\n&amp;gt;       assert b&amp;#x27;Invalid username or password&amp;#x27; in response.data\nE       assert b&amp;#x27;Invalid username or password&amp;#x27; in b&amp;#x27;&amp;lt;!doctype html&amp;gt;\\n&amp;lt;html lang=en&amp;gt;\\n&amp;lt;title&amp;gt;Redirecting...&amp;lt;/title&amp;gt;\\n&amp;lt;h1&amp;gt;Redirecting...&amp;lt;/h1&amp;gt;\\n&amp;lt;p&amp;gt;You should be redirected automatically to the target URL: &amp;lt;a href=&amp;quot;/auth/login&amp;quot;&amp;gt;/auth/login&amp;lt;/a&amp;gt;. If not, click the link.\\n&amp;#x27;\nE        +  where b&amp;#x27;&amp;lt;!doctype html&amp;gt;\\n&amp;lt;html lang=en&amp;gt;\\n&amp;lt;title&amp;gt;Redirecting...&amp;lt;/title&amp;gt;\\n&amp;lt;h1&amp;gt;Redirecting...&amp;lt;/h1&amp;gt;\\n&amp;lt;p&amp;gt;You should be redirected automatically to the target URL: &amp;lt;a href=&amp;quot;/auth/login&amp;quot;&amp;gt;/auth/login&amp;lt;/a&amp;gt;. If not, click the link.\\n&amp;#x27; = &amp;lt;WrapperTestResponse 209 bytes [302 FOUND]&amp;gt;.data\n\ntests\\test_auth.py:33: AssertionError\n&#34;}], &#34;tests/test_auth.py::test_login_invalid_username&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_auth.py::test_login_invalid_username&#34;, &#34;duration&#34;: &#34;602 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_auth.py::test_login_invalid_username&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;602 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;\n\n    def test_login_invalid_username(client):\n        &amp;quot;&amp;quot;&amp;quot;Test login with non-existent username.&amp;quot;&amp;quot;&amp;quot;\n        response = client.post(\n            &amp;#x27;/auth/login&amp;#x27;,\n            data={&amp;#x27;username&amp;#x27;: &amp;#x27;nonexistent&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;password&amp;#x27;}\n        )\n&amp;gt;       assert b&amp;#x27;Invalid username or password&amp;#x27; in response.data\nE       assert b&amp;#x27;Invalid username or password&amp;#x27; in b&amp;#x27;&amp;lt;!doctype html&amp;gt;\\n&amp;lt;html lang=en&amp;gt;\\n&amp;lt;title&amp;gt;Redirecting...&amp;lt;/title&amp;gt;\\n&amp;lt;h1&amp;gt;Redirecting...&amp;lt;/h1&amp;gt;\\n&amp;lt;p&amp;gt;You should be redirected automatically to the target URL: &amp;lt;a href=&amp;quot;/auth/login&amp;quot;&amp;gt;/auth/login&amp;lt;/a&amp;gt;. If not, click the link.\\n&amp;#x27;\nE        +  where b&amp;#x27;&amp;lt;!doctype html&amp;gt;\\n&amp;lt;html lang=en&amp;gt;\\n&amp;lt;title&amp;gt;Redirecting...&amp;lt;/title&amp;gt;\\n&amp;lt;h1&amp;gt;Redirecting...&amp;lt;/h1&amp;gt;\\n&amp;lt;p&amp;gt;You should be redirected automatically to the target URL: &amp;lt;a href=&amp;quot;/auth/login&amp;quot;&amp;gt;/auth/login&amp;lt;/a&amp;gt;. If not, click the link.\\n&amp;#x27; = &amp;lt;WrapperTestResponse 209 bytes [302 FOUND]&amp;gt;.data\n\ntests\\test_auth.py:42: AssertionError\n&#34;}], &#34;tests/test_auth.py::test_logout&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_auth.py::test_logout&#34;, &#34;duration&#34;: &#34;777 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_auth.py::test_logout&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;777 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_auth.py::test_user_roles&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_auth.py::test_user_roles&#34;, &#34;duration&#34;: &#34;593 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_auth.py::test_user_roles&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;593 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_auth.py::test_register_user&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_auth.py::test_register_user&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_auth.py::test_register_user&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;, auth = &amp;lt;conftest.auth.&amp;lt;locals&amp;gt;.AuthActions object at 0x000002597F465010&amp;gt;\n\n    def test_register_user(client, auth):\n        &amp;quot;&amp;quot;&amp;quot;Test user registration (requires admin).&amp;quot;&amp;quot;&amp;quot;\n        auth.login()\n        response = client.post(\n            &amp;#x27;/auth/register&amp;#x27;,\n            data={\n                &amp;#x27;username&amp;#x27;: &amp;#x27;newuser&amp;#x27;,\n                &amp;#x27;email&amp;#x27;: &amp;#x27;newuser@example.com&amp;#x27;,\n                &amp;#x27;password&amp;#x27;: &amp;#x27;newpassword&amp;#x27;,\n                &amp;#x27;password2&amp;#x27;: &amp;#x27;newpassword&amp;#x27;,\n                &amp;#x27;role&amp;#x27;: &amp;#x27;marketer&amp;#x27;\n            }\n        )\n&amp;gt;       assert response.headers.get(&amp;#x27;Location&amp;#x27;) == &amp;#x27;http://localhost/auth/users&amp;#x27;\nE       AssertionError: assert &amp;#x27;/auth/users&amp;#x27; == &amp;#x27;http://localhost/auth/users&amp;#x27;\nE         - http://localhost/auth/users\nE         + /auth/users\n\ntests\\test_auth.py:87: AssertionError\n&#34;}], &#34;tests/test_auth.py::test_admin_access_required&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_auth.py::test_admin_access_required&#34;, &#34;duration&#34;: &#34;784 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_auth.py::test_admin_access_required&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;784 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_auth.py::test_change_password&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_auth.py::test_change_password&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_auth.py::test_change_password&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;, auth = &amp;lt;conftest.auth.&amp;lt;locals&amp;gt;.AuthActions object at 0x000002597F9ABD10&amp;gt;\n\n    def test_change_password(client, auth):\n        &amp;quot;&amp;quot;&amp;quot;Test password change functionality.&amp;quot;&amp;quot;&amp;quot;\n        auth.login()\n    \n        # Change password\n        response = client.post(\n            &amp;#x27;/auth/change_password&amp;#x27;,\n            data={\n                &amp;#x27;current_password&amp;#x27;: &amp;#x27;password&amp;#x27;,\n                &amp;#x27;new_password&amp;#x27;: &amp;#x27;newpassword&amp;#x27;,\n                &amp;#x27;confirm_password&amp;#x27;: &amp;#x27;newpassword&amp;#x27;\n            },\n            follow_redirects=True\n        )\n        assert b&amp;#x27;Your password has been updated&amp;#x27; in response.data\n    \n        # Logout and login with new password\n        auth.logout()\n        response = client.post(\n            &amp;#x27;/auth/login&amp;#x27;,\n            data={&amp;#x27;username&amp;#x27;: &amp;#x27;admin&amp;#x27;, &amp;#x27;password&amp;#x27;: &amp;#x27;newpassword&amp;#x27;}\n        )\n&amp;gt;       assert response.headers.get(&amp;#x27;Location&amp;#x27;) == &amp;#x27;http://localhost/content/dashboard&amp;#x27;\nE       AssertionError: assert &amp;#x27;/content/dashboard&amp;#x27; == &amp;#x27;http://local...ent/dashboard&amp;#x27;\nE         - http://localhost/content/dashboard\nE         + /content/dashboard\n\ntests\\test_auth.py:129: AssertionError\n&#34;}], &#34;tests/test_auth.py::test_change_password_wrong_current&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_auth.py::test_change_password_wrong_current&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_auth.py::test_change_password_wrong_current&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;, auth = &amp;lt;conftest.auth.&amp;lt;locals&amp;gt;.AuthActions object at 0x000002597FAD4D70&amp;gt;\n\n    def test_change_password_wrong_current(client, auth):\n        &amp;quot;&amp;quot;&amp;quot;Test password change with incorrect current password.&amp;quot;&amp;quot;&amp;quot;\n        auth.login()\n    \n&amp;gt;       response = client.post(\n            &amp;#x27;/auth/change_password&amp;#x27;,\n            data={\n                &amp;#x27;current_password&amp;#x27;: &amp;#x27;wrongpassword&amp;#x27;,\n                &amp;#x27;new_password&amp;#x27;: &amp;#x27;newpassword&amp;#x27;,\n                &amp;#x27;confirm_password&amp;#x27;: &amp;#x27;newpassword&amp;#x27;\n            },\n            follow_redirects=True\n        )\n\ntests\\test_auth.py:136: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \nvenv\\Lib\\site-packages\\werkzeug\\test.py:1248: in post\n    return self.open(*args, **kw)\nvenv\\Lib\\site-packages\\flask\\testing.py:232: in open\n    response = super().open(\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1231: in open\n    response = self.resolve_redirect(response, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1137: in resolve_redirect\n    return self.open(builder, buffered=buffered)\nvenv\\Lib\\site-packages\\flask\\testing.py:232: in open\n    response = super().open(\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1197: in open\n    response = self.run_wsgi_app(request.environ, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1069: in run_wsgi_app\n    rv = run_wsgi_app(self.application, environ, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1345: in run_wsgi_app\n    app_rv = app(environ, start_response)\nvenv\\Lib\\site-packages\\flask\\app.py:2213: in __call__\n    return self.wsgi_app(environ, start_response)\nvenv\\Lib\\site-packages\\flask\\app.py:2193: in wsgi_app\n    response = self.handle_exception(e)\nvenv\\Lib\\site-packages\\flask\\app.py:2190: in wsgi_app\n    response = self.full_dispatch_request()\nvenv\\Lib\\site-packages\\flask\\app.py:1486: in full_dispatch_request\n    rv = self.handle_user_exception(e)\nvenv\\Lib\\site-packages\\flask\\app.py:1484: in full_dispatch_request\n    rv = self.dispatch_request()\nvenv\\Lib\\site-packages\\flask\\app.py:1469: in dispatch_request\n    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)\nvenv\\Lib\\site-packages\\flask_login\\utils.py:290: in decorated_view\n    return current_app.ensure_sync(func)(*args, **kwargs)\napp\\auth\\routes.py:109: in change_password\n    return render_template(&amp;#x27;auth/change_password.html&amp;#x27;, form=form)\nvenv\\Lib\\site-packages\\flask\\templating.py:150: in render_template\n    template = app.jinja_env.get_or_select_template(template_name_or_list)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:1087: in get_or_select_template\n    return self.get_template(template_name_or_list, parent, globals)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:1016: in get_template\n    return self._load_template(name, globals)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:975: in _load_template\n    template = self.loader.load(self, name, self.make_globals(globals))\nvenv\\Lib\\site-packages\\jinja2\\loaders.py:126: in load\n    source, filename, uptodate = self.get_source(environment, name)\nvenv\\Lib\\site-packages\\flask\\templating.py:64: in get_source\n    return self._get_source_fast(environment, template)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = &amp;lt;flask.templating.DispatchingJinjaLoader object at 0x000002597F9FAD80&amp;gt;, environment = &amp;lt;flask.templating.Environment object at 0x000002597F9F9F70&amp;gt;\ntemplate = &amp;#x27;auth/change_password.html&amp;#x27;\n\n    def _get_source_fast(\n        self, environment: Environment, template: str\n    ) -&amp;gt; tuple[str, str | None, t.Callable | None]:\n        for _srcobj, loader in self._iter_loaders(template):\n            try:\n                return loader.get_source(environment, template)\n            except TemplateNotFound:\n                continue\n&amp;gt;       raise TemplateNotFound(template)\nE       jinja2.exceptions.TemplateNotFound: auth/change_password.html\n\nvenv\\Lib\\site-packages\\flask\\templating.py:98: TemplateNotFound\n&#34;}], &#34;tests/test_content.py::test_dashboard_access&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_content.py::test_dashboard_access&#34;, &#34;duration&#34;: &#34;816 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_content.py::test_dashboard_access&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;816 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_content.py::test_website_detail&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_content.py::test_website_detail&#34;, &#34;duration&#34;: &#34;804 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_content.py::test_website_detail&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;804 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;, auth = &amp;lt;conftest.auth.&amp;lt;locals&amp;gt;.AuthActions object at 0x000002597FEEBA70&amp;gt;\n\n    def test_website_detail(client, auth):\n        &amp;quot;&amp;quot;&amp;quot;Test website detail page.&amp;quot;&amp;quot;&amp;quot;\n        auth.login()\n        response = client.get(&amp;#x27;/website/1&amp;#x27;)\n&amp;gt;       assert response.status_code == 200\nE       assert 404 == 200\nE        +  where 404 = &amp;lt;WrapperTestResponse streamed [404 NOT FOUND]&amp;gt;.status_code\n\ntests\\test_content.py:28: AssertionError\n&#34;}], &#34;tests/test_content.py::test_create_website&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_content.py::test_create_website&#34;, &#34;duration&#34;: &#34;794 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_content.py::test_create_website&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;794 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;, auth = &amp;lt;conftest.auth.&amp;lt;locals&amp;gt;.AuthActions object at 0x000002597FBBDA60&amp;gt;\n\n    def test_create_website(client, auth):\n        &amp;quot;&amp;quot;&amp;quot;Test website creation.&amp;quot;&amp;quot;&amp;quot;\n        auth.login()\n        response = client.post(\n            &amp;#x27;/website/new&amp;#x27;,\n            data={\n                &amp;#x27;name&amp;#x27;: &amp;#x27;New Website&amp;#x27;,\n                &amp;#x27;domain&amp;#x27;: &amp;#x27;new.example.com&amp;#x27;\n            },\n            follow_redirects=True\n        )\n&amp;gt;       assert b&amp;#x27;Website New Website created successfully&amp;#x27; in response.data\nE       assert b&amp;#x27;Website New Website created successfully&amp;#x27; in b&amp;#x27;&amp;lt;!DOCTYPE html&amp;gt;\\n&amp;lt;html lang=&amp;quot;en&amp;quot;&amp;gt;\\n&amp;lt;head&amp;gt;\\n    &amp;lt;meta charset=&amp;quot;UTF-8&amp;quot;&amp;gt;\\n    &amp;lt;meta name=&amp;quot;viewport&amp;quot; content=&amp;quot;width=devi...t src=&amp;quot;https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;\\n    \\n&amp;lt;/body&amp;gt;\\n&amp;lt;/html&amp;gt;&amp;#x27;\nE        +  where b&amp;#x27;&amp;lt;!DOCTYPE html&amp;gt;\\n&amp;lt;html lang=&amp;quot;en&amp;quot;&amp;gt;\\n&amp;lt;head&amp;gt;\\n    &amp;lt;meta charset=&amp;quot;UTF-8&amp;quot;&amp;gt;\\n    &amp;lt;meta name=&amp;quot;viewport&amp;quot; content=&amp;quot;width=devi...t src=&amp;quot;https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;\\n    \\n&amp;lt;/body&amp;gt;\\n&amp;lt;/html&amp;gt;&amp;#x27; = &amp;lt;WrapperTestResponse 3089 bytes [404 NOT FOUND]&amp;gt;.data\n\ntests\\test_content.py:46: AssertionError\n&#34;}], &#34;tests/test_content.py::test_create_page&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_content.py::test_create_page&#34;, &#34;duration&#34;: &#34;791 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_content.py::test_create_page&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;791 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;, auth = &amp;lt;conftest.auth.&amp;lt;locals&amp;gt;.AuthActions object at 0x000002597F7ED940&amp;gt;\n\n    def test_create_page(client, auth):\n        &amp;quot;&amp;quot;&amp;quot;Test page creation.&amp;quot;&amp;quot;&amp;quot;\n        auth.login()\n        response = client.post(\n            &amp;#x27;/page/new/1&amp;#x27;,\n            data={\n                &amp;#x27;title&amp;#x27;: &amp;#x27;New Page&amp;#x27;,\n                &amp;#x27;path&amp;#x27;: &amp;#x27;/new-page.html&amp;#x27;\n            },\n            follow_redirects=True\n        )\n&amp;gt;       assert b&amp;#x27;Page New Page created successfully&amp;#x27; in response.data\nE       assert b&amp;#x27;Page New Page created successfully&amp;#x27; in b&amp;#x27;&amp;lt;!DOCTYPE html&amp;gt;\\n&amp;lt;html lang=&amp;quot;en&amp;quot;&amp;gt;\\n&amp;lt;head&amp;gt;\\n    &amp;lt;meta charset=&amp;quot;UTF-8&amp;quot;&amp;gt;\\n    &amp;lt;meta name=&amp;quot;viewport&amp;quot; content=&amp;quot;width=devi...t src=&amp;quot;https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;\\n    \\n&amp;lt;/body&amp;gt;\\n&amp;lt;/html&amp;gt;&amp;#x27;\nE        +  where b&amp;#x27;&amp;lt;!DOCTYPE html&amp;gt;\\n&amp;lt;html lang=&amp;quot;en&amp;quot;&amp;gt;\\n&amp;lt;head&amp;gt;\\n    &amp;lt;meta charset=&amp;quot;UTF-8&amp;quot;&amp;gt;\\n    &amp;lt;meta name=&amp;quot;viewport&amp;quot; content=&amp;quot;width=devi...t src=&amp;quot;https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;\\n    \\n&amp;lt;/body&amp;gt;\\n&amp;lt;/html&amp;gt;&amp;#x27; = &amp;lt;WrapperTestResponse 3089 bytes [404 NOT FOUND]&amp;gt;.data\n\ntests\\test_content.py:65: AssertionError\n&#34;}], &#34;tests/test_content.py::test_api_get_page_content&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_content.py::test_api_get_page_content&#34;, &#34;duration&#34;: &#34;876 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_content.py::test_api_get_page_content&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;876 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;, auth = &amp;lt;conftest.auth.&amp;lt;locals&amp;gt;.AuthActions object at 0x000002597F73A480&amp;gt;\n\n    def test_api_get_page_content(client, auth):\n        &amp;quot;&amp;quot;&amp;quot;Test API endpoint to get page content.&amp;quot;&amp;quot;&amp;quot;\n        auth.login()\n        response = client.get(&amp;#x27;/api/page/1/content&amp;#x27;)\n&amp;gt;       assert response.status_code == 200\nE       assert 404 == 200\nE        +  where 404 = &amp;lt;WrapperTestResponse streamed [404 NOT FOUND]&amp;gt;.status_code\n\ntests\\test_content.py:78: AssertionError\n&#34;}], &#34;tests/test_content.py::test_api_save_page_content&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_content.py::test_api_save_page_content&#34;, &#34;duration&#34;: &#34;800 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_content.py::test_api_save_page_content&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;800 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;, auth = &amp;lt;conftest.auth.&amp;lt;locals&amp;gt;.AuthActions object at 0x000002597FB5C590&amp;gt;\n\n    def test_api_save_page_content(client, auth):\n        &amp;quot;&amp;quot;&amp;quot;Test API endpoint to save page content.&amp;quot;&amp;quot;&amp;quot;\n        auth.login()\n        content_changes = {\n            &amp;#x27;#title&amp;#x27;: &amp;#x27;Updated Title&amp;#x27;,\n            &amp;#x27;#content&amp;#x27;: &amp;#x27;Updated content text.&amp;#x27;\n        }\n    \n        response = client.post(\n            &amp;#x27;/api/page/1/content&amp;#x27;,\n            json={&amp;#x27;content&amp;#x27;: content_changes}\n        )\n&amp;gt;       assert response.status_code == 200\nE       assert 404 == 200\nE        +  where 404 = &amp;lt;WrapperTestResponse streamed [404 NOT FOUND]&amp;gt;.status_code\n\ntests\\test_content.py:98: AssertionError\n&#34;}], &#34;tests/test_content.py::test_parse_html_content&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_content.py::test_parse_html_content&#34;, &#34;duration&#34;: &#34;1 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_content.py::test_parse_html_content&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;1 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_content.py::test_apply_content_changes&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_content.py::test_apply_content_changes&#34;, &#34;duration&#34;: &#34;1 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_content.py::test_apply_content_changes&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;1 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_content.py::test_page_detail&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_content.py::test_page_detail&#34;, &#34;duration&#34;: &#34;791 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_content.py::test_page_detail&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;791 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;, auth = &amp;lt;conftest.auth.&amp;lt;locals&amp;gt;.AuthActions object at 0x000002597FAFC860&amp;gt;\n\n    def test_page_detail(client, auth):\n        &amp;quot;&amp;quot;&amp;quot;Test page detail view.&amp;quot;&amp;quot;&amp;quot;\n        auth.login()\n        response = client.get(&amp;#x27;/page/1&amp;#x27;)\n    \n&amp;gt;       assert response.status_code == 200\nE       assert 404 == 200\nE        +  where 404 = &amp;lt;WrapperTestResponse streamed [404 NOT FOUND]&amp;gt;.status_code\n\ntests\\test_content.py:179: AssertionError\n&#34;}], &#34;tests/test_content.py::test_edit_page&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_content.py::test_edit_page&#34;, &#34;duration&#34;: &#34;786 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_content.py::test_edit_page&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;786 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;, auth = &amp;lt;conftest.auth.&amp;lt;locals&amp;gt;.AuthActions object at 0x000002597FA392B0&amp;gt;\n\n    def test_edit_page(client, auth):\n        &amp;quot;&amp;quot;&amp;quot;Test edit page view.&amp;quot;&amp;quot;&amp;quot;\n        auth.login()\n        response = client.get(&amp;#x27;/page/1/edit&amp;#x27;)\n    \n&amp;gt;       assert response.status_code == 200\nE       assert 404 == 200\nE        +  where 404 = &amp;lt;WrapperTestResponse streamed [404 NOT FOUND]&amp;gt;.status_code\n\ntests\\test_content.py:189: AssertionError\n&#34;}], &#34;tests/test_content.py::test_content_version_activation&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_content.py::test_content_version_activation&#34;, &#34;duration&#34;: &#34;790 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_content.py::test_content_version_activation&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;790 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;, auth = &amp;lt;conftest.auth.&amp;lt;locals&amp;gt;.AuthActions object at 0x000002597F7F2B70&amp;gt;\n\n    def test_content_version_activation(client, auth):\n        &amp;quot;&amp;quot;&amp;quot;Test activation of content versions.&amp;quot;&amp;quot;&amp;quot;\n        auth.login()\n    \n        # Create a new content version\n        with client.application.app_context():\n            page = Page.query.get(1)\n            user = auth.login()\n    \n            # Create inactive version\n            inactive_version = ContentVersion(\n                page_id=page.id,\n                content_hash=&amp;#x27;xyz789&amp;#x27;,\n                content_json=&amp;#x27;{&amp;quot;#title&amp;quot;: &amp;quot;Another Test Title&amp;quot;, &amp;quot;#content&amp;quot;: &amp;quot;Another test content.&amp;quot;}&amp;#x27;,\n                version_type=&amp;#x27;content&amp;#x27;,\n                created_by=1,  # Admin user\n                is_active=False\n            )\n    \n            from app import db\n            db.session.add(inactive_version)\n            db.session.commit()\n    \n            version_id = inactive_version.id\n    \n        # Activate the version\n        response = client.post(\n            f&amp;#x27;/page/1/version/{version_id}/activate&amp;#x27;,\n            follow_redirects=True\n        )\n    \n&amp;gt;       assert b&amp;#x27;Content version activated successfully&amp;#x27; in response.data\nE       assert b&amp;#x27;Content version activated successfully&amp;#x27; in b&amp;#x27;&amp;lt;!DOCTYPE html&amp;gt;\\n&amp;lt;html lang=&amp;quot;en&amp;quot;&amp;gt;\\n&amp;lt;head&amp;gt;\\n    &amp;lt;meta charset=&amp;quot;UTF-8&amp;quot;&amp;gt;\\n    &amp;lt;meta name=&amp;quot;viewport&amp;quot; content=&amp;quot;width=devi...t src=&amp;quot;https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;\\n    \\n&amp;lt;/body&amp;gt;\\n&amp;lt;/html&amp;gt;&amp;#x27;\nE        +  where b&amp;#x27;&amp;lt;!DOCTYPE html&amp;gt;\\n&amp;lt;html lang=&amp;quot;en&amp;quot;&amp;gt;\\n&amp;lt;head&amp;gt;\\n    &amp;lt;meta charset=&amp;quot;UTF-8&amp;quot;&amp;gt;\\n    &amp;lt;meta name=&amp;quot;viewport&amp;quot; content=&amp;quot;width=devi...t src=&amp;quot;https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;\\n    \\n&amp;lt;/body&amp;gt;\\n&amp;lt;/html&amp;gt;&amp;#x27; = &amp;lt;WrapperTestResponse 3089 bytes [404 NOT FOUND]&amp;gt;.data\n\ntests\\test_content.py:224: AssertionError\n&#34;}], &#34;tests/test_integration.py::test_end_to_end_flow&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_integration.py::test_end_to_end_flow&#34;, &#34;duration&#34;: &#34;809 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_integration.py::test_end_to_end_flow&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;809 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;, auth = &amp;lt;conftest.auth.&amp;lt;locals&amp;gt;.AuthActions object at 0x000002597F1025A0&amp;gt;\n\n    def test_end_to_end_flow(client, auth):\n        &amp;quot;&amp;quot;&amp;quot;Test the complete user flow from login to content editing to split testing.&amp;quot;&amp;quot;&amp;quot;\n        # 1. Admin logs in\n        auth.login()\n    \n        # 2. Create a new website\n        response = client.post(\n            &amp;#x27;/website/new&amp;#x27;,\n            data={\n                &amp;#x27;name&amp;#x27;: &amp;#x27;Integration Test Site&amp;#x27;,\n                &amp;#x27;domain&amp;#x27;: &amp;#x27;integration.example.com&amp;#x27;\n            },\n            follow_redirects=True\n        )\n&amp;gt;       assert b&amp;#x27;Website Integration Test Site created successfully&amp;#x27; in response.data\nE       assert b&amp;#x27;Website Integration Test Site created successfully&amp;#x27; in b&amp;#x27;&amp;lt;!DOCTYPE html&amp;gt;\\n&amp;lt;html lang=&amp;quot;en&amp;quot;&amp;gt;\\n&amp;lt;head&amp;gt;\\n    &amp;lt;meta charset=&amp;quot;UTF-8&amp;quot;&amp;gt;\\n    &amp;lt;meta name=&amp;quot;viewport&amp;quot; content=&amp;quot;width=devi...t src=&amp;quot;https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;\\n    \\n&amp;lt;/body&amp;gt;\\n&amp;lt;/html&amp;gt;&amp;#x27;\nE        +  where b&amp;#x27;&amp;lt;!DOCTYPE html&amp;gt;\\n&amp;lt;html lang=&amp;quot;en&amp;quot;&amp;gt;\\n&amp;lt;head&amp;gt;\\n    &amp;lt;meta charset=&amp;quot;UTF-8&amp;quot;&amp;gt;\\n    &amp;lt;meta name=&amp;quot;viewport&amp;quot; content=&amp;quot;width=devi...t src=&amp;quot;https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;\\n    \\n&amp;lt;/body&amp;gt;\\n&amp;lt;/html&amp;gt;&amp;#x27; = &amp;lt;WrapperTestResponse 3089 bytes [404 NOT FOUND]&amp;gt;.data\n\ntests\\test_integration.py:29: AssertionError\n&#34;}], &#34;tests/test_integration.py::test_different_user_roles&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_integration.py::test_different_user_roles&#34;, &#34;duration&#34;: &#34;808 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_integration.py::test_different_user_roles&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;808 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;, auth = &amp;lt;conftest.auth.&amp;lt;locals&amp;gt;.AuthActions object at 0x000002597F251C10&amp;gt;\n\n    def test_different_user_roles(client, auth):\n        &amp;quot;&amp;quot;&amp;quot;Test that different user roles have appropriate permissions.&amp;quot;&amp;quot;&amp;quot;\n        # 1. Admin can access everything\n        auth.login(username=&amp;#x27;admin&amp;#x27;, password=&amp;#x27;password&amp;#x27;)\n    \n        response = client.get(&amp;#x27;/content/dashboard&amp;#x27;)\n        assert response.status_code == 200\n    \n&amp;gt;       response = client.get(&amp;#x27;/splitest/tests&amp;#x27;)\n\ntests\\test_integration.py:255: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \nvenv\\Lib\\site-packages\\werkzeug\\test.py:1243: in get\n    return self.open(*args, **kw)\nvenv\\Lib\\site-packages\\flask\\testing.py:232: in open\n    response = super().open(\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1197: in open\n    response = self.run_wsgi_app(request.environ, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1069: in run_wsgi_app\n    rv = run_wsgi_app(self.application, environ, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1345: in run_wsgi_app\n    app_rv = app(environ, start_response)\nvenv\\Lib\\site-packages\\flask\\app.py:2213: in __call__\n    return self.wsgi_app(environ, start_response)\nvenv\\Lib\\site-packages\\flask\\app.py:2193: in wsgi_app\n    response = self.handle_exception(e)\nvenv\\Lib\\site-packages\\flask\\app.py:2190: in wsgi_app\n    response = self.full_dispatch_request()\nvenv\\Lib\\site-packages\\flask\\app.py:1486: in full_dispatch_request\n    rv = self.handle_user_exception(e)\nvenv\\Lib\\site-packages\\flask\\app.py:1484: in full_dispatch_request\n    rv = self.dispatch_request()\nvenv\\Lib\\site-packages\\flask\\app.py:1469: in dispatch_request\n    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)\nvenv\\Lib\\site-packages\\flask_login\\utils.py:290: in decorated_view\n    return current_app.ensure_sync(func)(*args, **kwargs)\napp\\splitest\\routes.py:19: in test_list\n    return render_template(&amp;#x27;splitest/test_list.html&amp;#x27;, title=&amp;#x27;Split Tests&amp;#x27;, tests=tests)\nvenv\\Lib\\site-packages\\flask\\templating.py:150: in render_template\n    template = app.jinja_env.get_or_select_template(template_name_or_list)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:1087: in get_or_select_template\n    return self.get_template(template_name_or_list, parent, globals)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:1016: in get_template\n    return self._load_template(name, globals)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:975: in _load_template\n    template = self.loader.load(self, name, self.make_globals(globals))\nvenv\\Lib\\site-packages\\jinja2\\loaders.py:126: in load\n    source, filename, uptodate = self.get_source(environment, name)\nvenv\\Lib\\site-packages\\flask\\templating.py:64: in get_source\n    return self._get_source_fast(environment, template)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = &amp;lt;flask.templating.DispatchingJinjaLoader object at 0x000002597F24E2D0&amp;gt;, environment = &amp;lt;flask.templating.Environment object at 0x000002597F24E450&amp;gt;\ntemplate = &amp;#x27;splitest/test_list.html&amp;#x27;\n\n    def _get_source_fast(\n        self, environment: Environment, template: str\n    ) -&amp;gt; tuple[str, str | None, t.Callable | None]:\n        for _srcobj, loader in self._iter_loaders(template):\n            try:\n                return loader.get_source(environment, template)\n            except TemplateNotFound:\n                continue\n&amp;gt;       raise TemplateNotFound(template)\nE       jinja2.exceptions.TemplateNotFound: splitest/test_list.html\n\nvenv\\Lib\\site-packages\\flask\\templating.py:98: TemplateNotFound\n&#34;}], &#34;tests/test_splitest.py::test_test_list&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_splitest.py::test_test_list&#34;, &#34;duration&#34;: &#34;792 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_splitest.py::test_test_list&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;792 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;, auth = &amp;lt;conftest.auth.&amp;lt;locals&amp;gt;.AuthActions object at 0x000002597F6EA540&amp;gt;\n\n    def test_test_list(client, auth):\n        &amp;quot;&amp;quot;&amp;quot;Test split test list page.&amp;quot;&amp;quot;&amp;quot;\n        auth.login()\n&amp;gt;       response = client.get(&amp;#x27;/splitest/tests&amp;#x27;)\n\ntests\\test_splitest.py:16: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \nvenv\\Lib\\site-packages\\werkzeug\\test.py:1243: in get\n    return self.open(*args, **kw)\nvenv\\Lib\\site-packages\\flask\\testing.py:232: in open\n    response = super().open(\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1197: in open\n    response = self.run_wsgi_app(request.environ, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1069: in run_wsgi_app\n    rv = run_wsgi_app(self.application, environ, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1345: in run_wsgi_app\n    app_rv = app(environ, start_response)\nvenv\\Lib\\site-packages\\flask\\app.py:2213: in __call__\n    return self.wsgi_app(environ, start_response)\nvenv\\Lib\\site-packages\\flask\\app.py:2193: in wsgi_app\n    response = self.handle_exception(e)\nvenv\\Lib\\site-packages\\flask\\app.py:2190: in wsgi_app\n    response = self.full_dispatch_request()\nvenv\\Lib\\site-packages\\flask\\app.py:1486: in full_dispatch_request\n    rv = self.handle_user_exception(e)\nvenv\\Lib\\site-packages\\flask\\app.py:1484: in full_dispatch_request\n    rv = self.dispatch_request()\nvenv\\Lib\\site-packages\\flask\\app.py:1469: in dispatch_request\n    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)\nvenv\\Lib\\site-packages\\flask_login\\utils.py:290: in decorated_view\n    return current_app.ensure_sync(func)(*args, **kwargs)\napp\\splitest\\routes.py:19: in test_list\n    return render_template(&amp;#x27;splitest/test_list.html&amp;#x27;, title=&amp;#x27;Split Tests&amp;#x27;, tests=tests)\nvenv\\Lib\\site-packages\\flask\\templating.py:150: in render_template\n    template = app.jinja_env.get_or_select_template(template_name_or_list)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:1087: in get_or_select_template\n    return self.get_template(template_name_or_list, parent, globals)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:1016: in get_template\n    return self._load_template(name, globals)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:975: in _load_template\n    template = self.loader.load(self, name, self.make_globals(globals))\nvenv\\Lib\\site-packages\\jinja2\\loaders.py:126: in load\n    source, filename, uptodate = self.get_source(environment, name)\nvenv\\Lib\\site-packages\\flask\\templating.py:64: in get_source\n    return self._get_source_fast(environment, template)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = &amp;lt;flask.templating.DispatchingJinjaLoader object at 0x000002597F381C40&amp;gt;, environment = &amp;lt;flask.templating.Environment object at 0x000002597F381C70&amp;gt;\ntemplate = &amp;#x27;splitest/test_list.html&amp;#x27;\n\n    def _get_source_fast(\n        self, environment: Environment, template: str\n    ) -&amp;gt; tuple[str, str | None, t.Callable | None]:\n        for _srcobj, loader in self._iter_loaders(template):\n            try:\n                return loader.get_source(environment, template)\n            except TemplateNotFound:\n                continue\n&amp;gt;       raise TemplateNotFound(template)\nE       jinja2.exceptions.TemplateNotFound: splitest/test_list.html\n\nvenv\\Lib\\site-packages\\flask\\templating.py:98: TemplateNotFound\n&#34;}], &#34;tests/test_splitest.py::test_test_detail&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_splitest.py::test_test_detail&#34;, &#34;duration&#34;: &#34;800 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_splitest.py::test_test_detail&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;800 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;, auth = &amp;lt;conftest.auth.&amp;lt;locals&amp;gt;.AuthActions object at 0x000002597F1426C0&amp;gt;\n\n    def test_test_detail(client, auth):\n        &amp;quot;&amp;quot;&amp;quot;Test split test detail page.&amp;quot;&amp;quot;&amp;quot;\n        auth.login()\n&amp;gt;       response = client.get(&amp;#x27;/splitest/test/1&amp;#x27;)\n\ntests\\test_splitest.py:26: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \nvenv\\Lib\\site-packages\\werkzeug\\test.py:1243: in get\n    return self.open(*args, **kw)\nvenv\\Lib\\site-packages\\flask\\testing.py:232: in open\n    response = super().open(\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1197: in open\n    response = self.run_wsgi_app(request.environ, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1069: in run_wsgi_app\n    rv = run_wsgi_app(self.application, environ, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1345: in run_wsgi_app\n    app_rv = app(environ, start_response)\nvenv\\Lib\\site-packages\\flask\\app.py:2213: in __call__\n    return self.wsgi_app(environ, start_response)\nvenv\\Lib\\site-packages\\flask\\app.py:2193: in wsgi_app\n    response = self.handle_exception(e)\nvenv\\Lib\\site-packages\\flask\\app.py:2190: in wsgi_app\n    response = self.full_dispatch_request()\nvenv\\Lib\\site-packages\\flask\\app.py:1486: in full_dispatch_request\n    rv = self.handle_user_exception(e)\nvenv\\Lib\\site-packages\\flask\\app.py:1484: in full_dispatch_request\n    rv = self.dispatch_request()\nvenv\\Lib\\site-packages\\flask\\app.py:1469: in dispatch_request\n    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)\nvenv\\Lib\\site-packages\\flask_login\\utils.py:290: in decorated_view\n    return current_app.ensure_sync(func)(*args, **kwargs)\napp\\splitest\\routes.py:83: in test_detail\n    return render_template(&amp;#x27;splitest/test_detail.html&amp;#x27;, title=test.name, test=test,\nvenv\\Lib\\site-packages\\flask\\templating.py:150: in render_template\n    template = app.jinja_env.get_or_select_template(template_name_or_list)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:1087: in get_or_select_template\n    return self.get_template(template_name_or_list, parent, globals)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:1016: in get_template\n    return self._load_template(name, globals)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:975: in _load_template\n    template = self.loader.load(self, name, self.make_globals(globals))\nvenv\\Lib\\site-packages\\jinja2\\loaders.py:126: in load\n    source, filename, uptodate = self.get_source(environment, name)\nvenv\\Lib\\site-packages\\flask\\templating.py:64: in get_source\n    return self._get_source_fast(environment, template)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = &amp;lt;flask.templating.DispatchingJinjaLoader object at 0x000002597F670650&amp;gt;, environment = &amp;lt;flask.templating.Environment object at 0x000002597F6703B0&amp;gt;\ntemplate = &amp;#x27;splitest/test_detail.html&amp;#x27;\n\n    def _get_source_fast(\n        self, environment: Environment, template: str\n    ) -&amp;gt; tuple[str, str | None, t.Callable | None]:\n        for _srcobj, loader in self._iter_loaders(template):\n            try:\n                return loader.get_source(environment, template)\n            except TemplateNotFound:\n                continue\n&amp;gt;       raise TemplateNotFound(template)\nE       jinja2.exceptions.TemplateNotFound: splitest/test_detail.html\n\nvenv\\Lib\\site-packages\\flask\\templating.py:98: TemplateNotFound\n&#34;}], &#34;tests/test_splitest.py::test_create_test&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_splitest.py::test_create_test&#34;, &#34;duration&#34;: &#34;783 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_splitest.py::test_create_test&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;783 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;, auth = &amp;lt;conftest.auth.&amp;lt;locals&amp;gt;.AuthActions object at 0x000002597EC10BC0&amp;gt;\n\n    def test_create_test(client, auth):\n        &amp;quot;&amp;quot;&amp;quot;Test creation of a new split test.&amp;quot;&amp;quot;&amp;quot;\n        auth.login()\n    \n        # First, create the test\n&amp;gt;       response = client.post(\n            &amp;#x27;/splitest/test/new/2&amp;#x27;,  # Create test for About page\n            data={\n                &amp;#x27;name&amp;#x27;: &amp;#x27;About Page Test&amp;#x27;,\n                &amp;#x27;test_type&amp;#x27;: &amp;#x27;content&amp;#x27;,\n                &amp;#x27;goal_page_id&amp;#x27;: &amp;#x27;3&amp;#x27;  # Contact page is goal\n            },\n            follow_redirects=True\n        )\n\ntests\\test_splitest.py:39: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \nvenv\\Lib\\site-packages\\werkzeug\\test.py:1248: in post\n    return self.open(*args, **kw)\nvenv\\Lib\\site-packages\\flask\\testing.py:232: in open\n    response = super().open(\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1197: in open\n    response = self.run_wsgi_app(request.environ, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1069: in run_wsgi_app\n    rv = run_wsgi_app(self.application, environ, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1345: in run_wsgi_app\n    app_rv = app(environ, start_response)\nvenv\\Lib\\site-packages\\flask\\app.py:2213: in __call__\n    return self.wsgi_app(environ, start_response)\nvenv\\Lib\\site-packages\\flask\\app.py:2193: in wsgi_app\n    response = self.handle_exception(e)\nvenv\\Lib\\site-packages\\flask\\app.py:2190: in wsgi_app\n    response = self.full_dispatch_request()\nvenv\\Lib\\site-packages\\flask\\app.py:1486: in full_dispatch_request\n    rv = self.handle_user_exception(e)\nvenv\\Lib\\site-packages\\flask\\app.py:1484: in full_dispatch_request\n    rv = self.dispatch_request()\nvenv\\Lib\\site-packages\\flask\\app.py:1469: in dispatch_request\n    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)\nvenv\\Lib\\site-packages\\flask_login\\utils.py:290: in decorated_view\n    return current_app.ensure_sync(func)(*args, **kwargs)\napp\\auth\\routes.py:31: in decorated_function\n    return f(*args, **kwargs)\napp\\splitest\\routes.py:69: in new_test\n    return redirect(url_for(&amp;#x27;splitest.add_variant&amp;#x27;, test_id=test.id))\nvenv\\Lib\\site-packages\\flask\\helpers.py:225: in url_for\n    return current_app.url_for(\nvenv\\Lib\\site-packages\\flask\\app.py:1697: in url_for\n    return self.handle_url_build_error(error, endpoint, values)\nvenv\\Lib\\site-packages\\flask\\app.py:1686: in url_for\n    rv = url_adapter.build(  # type: ignore[union-attr]\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = &amp;lt;werkzeug.routing.map.MapAdapter object at 0x000002597EC5F8F0&amp;gt;, endpoint = &amp;#x27;splitest.add_variant&amp;#x27;, values = {&amp;#x27;test_id&amp;#x27;: 2}, method = None, force_external = False\nappend_unknown = True, url_scheme = None\n\n    def build(\n        self,\n        endpoint: str,\n        values: t.Mapping[str, t.Any] | None = None,\n        method: str | None = None,\n        force_external: bool = False,\n        append_unknown: bool = True,\n        url_scheme: str | None = None,\n    ) -&amp;gt; str:\n        &amp;quot;&amp;quot;&amp;quot;Building URLs works pretty much the other way round.  Instead of\n        `match` you call `build` and pass it the endpoint and a dict of\n        arguments for the placeholders.\n    \n        The `build` function also accepts an argument called `force_external`\n        which, if you set it to `True` will force external URLs. Per default\n        external URLs (include the server name) will only be used if the\n        target URL is on a different subdomain.\n    \n        &amp;gt;&amp;gt;&amp;gt; m = Map([\n        ...     Rule(&amp;#x27;/&amp;#x27;, endpoint=&amp;#x27;index&amp;#x27;),\n        ...     Rule(&amp;#x27;/downloads/&amp;#x27;, endpoint=&amp;#x27;downloads/index&amp;#x27;),\n        ...     Rule(&amp;#x27;/downloads/&amp;lt;int:id&amp;gt;&amp;#x27;, endpoint=&amp;#x27;downloads/show&amp;#x27;)\n        ... ])\n        &amp;gt;&amp;gt;&amp;gt; urls = m.bind(&amp;quot;example.com&amp;quot;, &amp;quot;/&amp;quot;)\n        &amp;gt;&amp;gt;&amp;gt; urls.build(&amp;quot;index&amp;quot;, {})\n        &amp;#x27;/&amp;#x27;\n        &amp;gt;&amp;gt;&amp;gt; urls.build(&amp;quot;downloads/show&amp;quot;, {&amp;#x27;id&amp;#x27;: 42})\n        &amp;#x27;/downloads/42&amp;#x27;\n        &amp;gt;&amp;gt;&amp;gt; urls.build(&amp;quot;downloads/show&amp;quot;, {&amp;#x27;id&amp;#x27;: 42}, force_external=True)\n        &amp;#x27;http://example.com/downloads/42&amp;#x27;\n    \n        Because URLs cannot contain non ASCII data you will always get\n        bytes back.  Non ASCII characters are urlencoded with the\n        charset defined on the map instance.\n    \n        Additional values are converted to strings and appended to the URL as\n        URL querystring parameters:\n    \n        &amp;gt;&amp;gt;&amp;gt; urls.build(&amp;quot;index&amp;quot;, {&amp;#x27;q&amp;#x27;: &amp;#x27;My Searchstring&amp;#x27;})\n        &amp;#x27;/?q=My+Searchstring&amp;#x27;\n    \n        When processing those additional values, lists are furthermore\n        interpreted as multiple values (as per\n        :py:class:`werkzeug.datastructures.MultiDict`):\n    \n        &amp;gt;&amp;gt;&amp;gt; urls.build(&amp;quot;index&amp;quot;, {&amp;#x27;q&amp;#x27;: [&amp;#x27;a&amp;#x27;, &amp;#x27;b&amp;#x27;, &amp;#x27;c&amp;#x27;]})\n        &amp;#x27;/?q=a&amp;amp;q=b&amp;amp;q=c&amp;#x27;\n    \n        Passing a ``MultiDict`` will also add multiple values:\n    \n        &amp;gt;&amp;gt;&amp;gt; urls.build(&amp;quot;index&amp;quot;, MultiDict(((&amp;#x27;p&amp;#x27;, &amp;#x27;z&amp;#x27;), (&amp;#x27;q&amp;#x27;, &amp;#x27;a&amp;#x27;), (&amp;#x27;q&amp;#x27;, &amp;#x27;b&amp;#x27;))))\n        &amp;#x27;/?p=z&amp;amp;q=a&amp;amp;q=b&amp;#x27;\n    \n        If a rule does not exist when building a `BuildError` exception is\n        raised.\n    \n        The build method accepts an argument called `method` which allows you\n        to specify the method you want to have an URL built for if you have\n        different methods for the same endpoint specified.\n    \n        :param endpoint: the endpoint of the URL to build.\n        :param values: the values for the URL to build.  Unhandled values are\n                       appended to the URL as query parameters.\n        :param method: the HTTP method for the rule if there are different\n                       URLs for different methods on the same endpoint.\n        :param force_external: enforce full canonical external URLs. If the URL\n                               scheme is not provided, this will generate\n                               a protocol-relative URL.\n        :param append_unknown: unknown parameters are appended to the generated\n                               URL as query string argument.  Disable this\n                               if you want the builder to ignore those.\n        :param url_scheme: Scheme to use in place of the bound\n            :attr:`url_scheme`.\n    \n        .. versionchanged:: 2.0\n            Added the ``url_scheme`` parameter.\n    \n        .. versionadded:: 0.6\n           Added the ``append_unknown`` parameter.\n        &amp;quot;&amp;quot;&amp;quot;\n        self.map.update()\n    \n        if values:\n            if isinstance(values, MultiDict):\n                values = {\n                    k: (v[0] if len(v) == 1 else v)\n                    for k, v in dict.items(values)\n                    if len(v) != 0\n                }\n            else:  # plain dict\n                values = {k: v for k, v in values.items() if v is not None}\n        else:\n            values = {}\n    \n        rv = self._partial_build(endpoint, values, method, append_unknown)\n        if rv is None:\n&amp;gt;           raise BuildError(endpoint, values, method, self)\nE           werkzeug.routing.exceptions.BuildError: Could not build url for endpoint &amp;#x27;splitest.add_variant&amp;#x27; with values [&amp;#x27;test_id&amp;#x27;]. Did you mean &amp;#x27;splitest.add_variant_route&amp;#x27; instead?\n\nvenv\\Lib\\site-packages\\werkzeug\\routing\\map.py:950: BuildError\n&#34;}], &#34;tests/test_splitest.py::test_add_variant&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_splitest.py::test_add_variant&#34;, &#34;duration&#34;: &#34;783 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_splitest.py::test_add_variant&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;783 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;, auth = &amp;lt;conftest.auth.&amp;lt;locals&amp;gt;.AuthActions object at 0x000002590D074B00&amp;gt;\n\n    def test_add_variant(client, auth):\n        &amp;quot;&amp;quot;&amp;quot;Test adding a variant to a split test.&amp;quot;&amp;quot;&amp;quot;\n        auth.login()\n    \n        # Create a content version to use\n        with client.application.app_context():\n            from app import db\n            from app.content.models import ContentVersion\n    \n            content_version = ContentVersion(\n                page_id=2,  # About page\n                content_hash=&amp;#x27;test123&amp;#x27;,\n                content_json=&amp;#x27;{&amp;quot;#title&amp;quot;: &amp;quot;About Us Variant&amp;quot;}&amp;#x27;,\n                version_type=&amp;#x27;content&amp;#x27;,\n                created_by=1,  # Admin user\n                is_active=False\n            )\n    \n            db.session.add(content_version)\n            db.session.commit()\n    \n            version_id = content_version.id\n    \n        # First create a test\n&amp;gt;       response = client.post(\n            &amp;#x27;/splitest/test/new/2&amp;#x27;,  # Create test for About page\n            data={\n                &amp;#x27;name&amp;#x27;: &amp;#x27;About Page Test 2&amp;#x27;,\n                &amp;#x27;test_type&amp;#x27;: &amp;#x27;content&amp;#x27;,\n                &amp;#x27;goal_page_id&amp;#x27;: &amp;#x27;3&amp;#x27;  # Contact page is goal\n            },\n            follow_redirects=True\n        )\n\ntests\\test_splitest.py:83: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \nvenv\\Lib\\site-packages\\werkzeug\\test.py:1248: in post\n    return self.open(*args, **kw)\nvenv\\Lib\\site-packages\\flask\\testing.py:232: in open\n    response = super().open(\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1197: in open\n    response = self.run_wsgi_app(request.environ, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1069: in run_wsgi_app\n    rv = run_wsgi_app(self.application, environ, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1345: in run_wsgi_app\n    app_rv = app(environ, start_response)\nvenv\\Lib\\site-packages\\flask\\app.py:2213: in __call__\n    return self.wsgi_app(environ, start_response)\nvenv\\Lib\\site-packages\\flask\\app.py:2193: in wsgi_app\n    response = self.handle_exception(e)\nvenv\\Lib\\site-packages\\flask\\app.py:2190: in wsgi_app\n    response = self.full_dispatch_request()\nvenv\\Lib\\site-packages\\flask\\app.py:1486: in full_dispatch_request\n    rv = self.handle_user_exception(e)\nvenv\\Lib\\site-packages\\flask\\app.py:1484: in full_dispatch_request\n    rv = self.dispatch_request()\nvenv\\Lib\\site-packages\\flask\\app.py:1469: in dispatch_request\n    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)\nvenv\\Lib\\site-packages\\flask_login\\utils.py:290: in decorated_view\n    return current_app.ensure_sync(func)(*args, **kwargs)\napp\\auth\\routes.py:31: in decorated_function\n    return f(*args, **kwargs)\napp\\splitest\\routes.py:69: in new_test\n    return redirect(url_for(&amp;#x27;splitest.add_variant&amp;#x27;, test_id=test.id))\nvenv\\Lib\\site-packages\\flask\\helpers.py:225: in url_for\n    return current_app.url_for(\nvenv\\Lib\\site-packages\\flask\\app.py:1697: in url_for\n    return self.handle_url_build_error(error, endpoint, values)\nvenv\\Lib\\site-packages\\flask\\app.py:1686: in url_for\n    rv = url_adapter.build(  # type: ignore[union-attr]\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = &amp;lt;werkzeug.routing.map.MapAdapter object at 0x000002590D075880&amp;gt;, endpoint = &amp;#x27;splitest.add_variant&amp;#x27;, values = {&amp;#x27;test_id&amp;#x27;: 2}, method = None, force_external = False\nappend_unknown = True, url_scheme = None\n\n    def build(\n        self,\n        endpoint: str,\n        values: t.Mapping[str, t.Any] | None = None,\n        method: str | None = None,\n        force_external: bool = False,\n        append_unknown: bool = True,\n        url_scheme: str | None = None,\n    ) -&amp;gt; str:\n        &amp;quot;&amp;quot;&amp;quot;Building URLs works pretty much the other way round.  Instead of\n        `match` you call `build` and pass it the endpoint and a dict of\n        arguments for the placeholders.\n    \n        The `build` function also accepts an argument called `force_external`\n        which, if you set it to `True` will force external URLs. Per default\n        external URLs (include the server name) will only be used if the\n        target URL is on a different subdomain.\n    \n        &amp;gt;&amp;gt;&amp;gt; m = Map([\n        ...     Rule(&amp;#x27;/&amp;#x27;, endpoint=&amp;#x27;index&amp;#x27;),\n        ...     Rule(&amp;#x27;/downloads/&amp;#x27;, endpoint=&amp;#x27;downloads/index&amp;#x27;),\n        ...     Rule(&amp;#x27;/downloads/&amp;lt;int:id&amp;gt;&amp;#x27;, endpoint=&amp;#x27;downloads/show&amp;#x27;)\n        ... ])\n        &amp;gt;&amp;gt;&amp;gt; urls = m.bind(&amp;quot;example.com&amp;quot;, &amp;quot;/&amp;quot;)\n        &amp;gt;&amp;gt;&amp;gt; urls.build(&amp;quot;index&amp;quot;, {})\n        &amp;#x27;/&amp;#x27;\n        &amp;gt;&amp;gt;&amp;gt; urls.build(&amp;quot;downloads/show&amp;quot;, {&amp;#x27;id&amp;#x27;: 42})\n        &amp;#x27;/downloads/42&amp;#x27;\n        &amp;gt;&amp;gt;&amp;gt; urls.build(&amp;quot;downloads/show&amp;quot;, {&amp;#x27;id&amp;#x27;: 42}, force_external=True)\n        &amp;#x27;http://example.com/downloads/42&amp;#x27;\n    \n        Because URLs cannot contain non ASCII data you will always get\n        bytes back.  Non ASCII characters are urlencoded with the\n        charset defined on the map instance.\n    \n        Additional values are converted to strings and appended to the URL as\n        URL querystring parameters:\n    \n        &amp;gt;&amp;gt;&amp;gt; urls.build(&amp;quot;index&amp;quot;, {&amp;#x27;q&amp;#x27;: &amp;#x27;My Searchstring&amp;#x27;})\n        &amp;#x27;/?q=My+Searchstring&amp;#x27;\n    \n        When processing those additional values, lists are furthermore\n        interpreted as multiple values (as per\n        :py:class:`werkzeug.datastructures.MultiDict`):\n    \n        &amp;gt;&amp;gt;&amp;gt; urls.build(&amp;quot;index&amp;quot;, {&amp;#x27;q&amp;#x27;: [&amp;#x27;a&amp;#x27;, &amp;#x27;b&amp;#x27;, &amp;#x27;c&amp;#x27;]})\n        &amp;#x27;/?q=a&amp;amp;q=b&amp;amp;q=c&amp;#x27;\n    \n        Passing a ``MultiDict`` will also add multiple values:\n    \n        &amp;gt;&amp;gt;&amp;gt; urls.build(&amp;quot;index&amp;quot;, MultiDict(((&amp;#x27;p&amp;#x27;, &amp;#x27;z&amp;#x27;), (&amp;#x27;q&amp;#x27;, &amp;#x27;a&amp;#x27;), (&amp;#x27;q&amp;#x27;, &amp;#x27;b&amp;#x27;))))\n        &amp;#x27;/?p=z&amp;amp;q=a&amp;amp;q=b&amp;#x27;\n    \n        If a rule does not exist when building a `BuildError` exception is\n        raised.\n    \n        The build method accepts an argument called `method` which allows you\n        to specify the method you want to have an URL built for if you have\n        different methods for the same endpoint specified.\n    \n        :param endpoint: the endpoint of the URL to build.\n        :param values: the values for the URL to build.  Unhandled values are\n                       appended to the URL as query parameters.\n        :param method: the HTTP method for the rule if there are different\n                       URLs for different methods on the same endpoint.\n        :param force_external: enforce full canonical external URLs. If the URL\n                               scheme is not provided, this will generate\n                               a protocol-relative URL.\n        :param append_unknown: unknown parameters are appended to the generated\n                               URL as query string argument.  Disable this\n                               if you want the builder to ignore those.\n        :param url_scheme: Scheme to use in place of the bound\n            :attr:`url_scheme`.\n    \n        .. versionchanged:: 2.0\n            Added the ``url_scheme`` parameter.\n    \n        .. versionadded:: 0.6\n           Added the ``append_unknown`` parameter.\n        &amp;quot;&amp;quot;&amp;quot;\n        self.map.update()\n    \n        if values:\n            if isinstance(values, MultiDict):\n                values = {\n                    k: (v[0] if len(v) == 1 else v)\n                    for k, v in dict.items(values)\n                    if len(v) != 0\n                }\n            else:  # plain dict\n                values = {k: v for k, v in values.items() if v is not None}\n        else:\n            values = {}\n    \n        rv = self._partial_build(endpoint, values, method, append_unknown)\n        if rv is None:\n&amp;gt;           raise BuildError(endpoint, values, method, self)\nE           werkzeug.routing.exceptions.BuildError: Could not build url for endpoint &amp;#x27;splitest.add_variant&amp;#x27; with values [&amp;#x27;test_id&amp;#x27;]. Did you mean &amp;#x27;splitest.add_variant_route&amp;#x27; instead?\n\nvenv\\Lib\\site-packages\\werkzeug\\routing\\map.py:950: BuildError\n&#34;}], &#34;tests/test_splitest.py::test_start_stop_test&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_splitest.py::test_start_stop_test&#34;, &#34;duration&#34;: &#34;896 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_splitest.py::test_start_stop_test&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;896 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;, auth = &amp;lt;conftest.auth.&amp;lt;locals&amp;gt;.AuthActions object at 0x000002597F011610&amp;gt;\n\n    def test_start_stop_test(client, auth):\n        &amp;quot;&amp;quot;&amp;quot;Test starting and stopping a split test.&amp;quot;&amp;quot;&amp;quot;\n        auth.login()\n    \n        # Create test with two variants\n        with client.application.app_context():\n            from app import db\n            from app.content.models import ContentVersion\n    \n            # Create two content versions\n            version1 = ContentVersion(\n                page_id=2,  # About page\n                content_hash=&amp;#x27;version1&amp;#x27;,\n                content_json=&amp;#x27;{&amp;quot;#title&amp;quot;: &amp;quot;About Us Version 1&amp;quot;}&amp;#x27;,\n                version_type=&amp;#x27;content&amp;#x27;,\n                created_by=1,\n                is_active=False\n            )\n    \n            version2 = ContentVersion(\n                page_id=2,  # About page\n                content_hash=&amp;#x27;version2&amp;#x27;,\n                content_json=&amp;#x27;{&amp;quot;#title&amp;quot;: &amp;quot;About Us Version 2&amp;quot;}&amp;#x27;,\n                version_type=&amp;#x27;content&amp;#x27;,\n                created_by=1,\n                is_active=False\n            )\n    \n            db.session.add_all([version1, version2])\n            db.session.commit()\n    \n            # Create test\n            test = create_split_test(\n                page_id=2,\n                name=&amp;#x27;Start/Stop Test&amp;#x27;,\n                test_type=&amp;#x27;content&amp;#x27;,\n                goal_page_id=3,\n                user_id=1\n            )\n    \n            # Add variants\n            add_variant(test.id, &amp;#x27;Control&amp;#x27;, version1.id, 1)\n            add_variant(test.id, &amp;#x27;Variant B&amp;#x27;, version2.id, 1)\n    \n            # Set as inactive initially\n            test.is_active = False\n            db.session.commit()\n    \n            test_id = test.id\n    \n        # Start the test\n&amp;gt;       response = client.post(\n            f&amp;#x27;/splitest/test/{test_id}/start&amp;#x27;,\n            follow_redirects=True\n        )\n\ntests\\test_splitest.py:168: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \nvenv\\Lib\\site-packages\\werkzeug\\test.py:1248: in post\n    return self.open(*args, **kw)\nvenv\\Lib\\site-packages\\flask\\testing.py:232: in open\n    response = super().open(\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1231: in open\n    response = self.resolve_redirect(response, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1137: in resolve_redirect\n    return self.open(builder, buffered=buffered)\nvenv\\Lib\\site-packages\\flask\\testing.py:232: in open\n    response = super().open(\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1197: in open\n    response = self.run_wsgi_app(request.environ, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1069: in run_wsgi_app\n    rv = run_wsgi_app(self.application, environ, buffered=buffered)\nvenv\\Lib\\site-packages\\werkzeug\\test.py:1345: in run_wsgi_app\n    app_rv = app(environ, start_response)\nvenv\\Lib\\site-packages\\flask\\app.py:2213: in __call__\n    return self.wsgi_app(environ, start_response)\nvenv\\Lib\\site-packages\\flask\\app.py:2193: in wsgi_app\n    response = self.handle_exception(e)\nvenv\\Lib\\site-packages\\flask\\app.py:2190: in wsgi_app\n    response = self.full_dispatch_request()\nvenv\\Lib\\site-packages\\flask\\app.py:1486: in full_dispatch_request\n    rv = self.handle_user_exception(e)\nvenv\\Lib\\site-packages\\flask\\app.py:1484: in full_dispatch_request\n    rv = self.dispatch_request()\nvenv\\Lib\\site-packages\\flask\\app.py:1469: in dispatch_request\n    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)\nvenv\\Lib\\site-packages\\flask_login\\utils.py:290: in decorated_view\n    return current_app.ensure_sync(func)(*args, **kwargs)\napp\\splitest\\routes.py:83: in test_detail\n    return render_template(&amp;#x27;splitest/test_detail.html&amp;#x27;, title=test.name, test=test,\nvenv\\Lib\\site-packages\\flask\\templating.py:150: in render_template\n    template = app.jinja_env.get_or_select_template(template_name_or_list)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:1087: in get_or_select_template\n    return self.get_template(template_name_or_list, parent, globals)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:1016: in get_template\n    return self._load_template(name, globals)\nvenv\\Lib\\site-packages\\jinja2\\environment.py:975: in _load_template\n    template = self.loader.load(self, name, self.make_globals(globals))\nvenv\\Lib\\site-packages\\jinja2\\loaders.py:126: in load\n    source, filename, uptodate = self.get_source(environment, name)\nvenv\\Lib\\site-packages\\flask\\templating.py:64: in get_source\n    return self._get_source_fast(environment, template)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = &amp;lt;flask.templating.DispatchingJinjaLoader object at 0x000002590D0A58E0&amp;gt;, environment = &amp;lt;flask.templating.Environment object at 0x000002590D0A5880&amp;gt;\ntemplate = &amp;#x27;splitest/test_detail.html&amp;#x27;\n\n    def _get_source_fast(\n        self, environment: Environment, template: str\n    ) -&amp;gt; tuple[str, str | None, t.Callable | None]:\n        for _srcobj, loader in self._iter_loaders(template):\n            try:\n                return loader.get_source(environment, template)\n            except TemplateNotFound:\n                continue\n&amp;gt;       raise TemplateNotFound(template)\nE       jinja2.exceptions.TemplateNotFound: splitest/test_detail.html\n\nvenv\\Lib\\site-packages\\flask\\templating.py:98: TemplateNotFound\n&#34;}], &#34;tests/test_splitest.py::test_get_visitor_id&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_splitest.py::test_get_visitor_id&#34;, &#34;duration&#34;: &#34;1 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_splitest.py::test_get_visitor_id&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;1 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;def test_get_visitor_id():\n        &amp;quot;&amp;quot;&amp;quot;Test getting a visitor ID from a request.&amp;quot;&amp;quot;&amp;quot;\n        from flask import Request\n        from werkzeug.test import EnvironBuilder\n    \n        # Create a test request with no cookie\n        builder = EnvironBuilder()\n        env = builder.get_environ()\n        request = Request(env)\n    \n        # First call should generate a new ID\n&amp;gt;       visitor_id = get_visitor_id(request)\n\ntests\\test_splitest.py:204: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \napp\\utils.py:19: in get_visitor_id\n    visitor_id = request.cookies.get(&amp;#x27;visitor_id&amp;#x27;)\nvenv\\Lib\\site-packages\\werkzeug\\local.py:311: in __get__\n    obj = instance._get_current_object()\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\n    def _get_current_object() -&amp;gt; T:\n        try:\n            obj = local.get()\n        except LookupError:\n&amp;gt;           raise RuntimeError(unbound_message) from None\nE           RuntimeError: Working outside of request context.\nE           \nE           This typically means that you attempted to use functionality that needed\nE           an active HTTP request. Consult the documentation on testing for\nE           information about how to avoid this problem.\n\nvenv\\Lib\\site-packages\\werkzeug\\local.py:508: RuntimeError\n&#34;}], &#34;tests/test_splitest.py::test_assign_variant&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_splitest.py::test_assign_variant&#34;, &#34;duration&#34;: &#34;609 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_splitest.py::test_assign_variant&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;609 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_splitest.py::test_record_conversion&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_splitest.py::test_record_conversion&#34;, &#34;duration&#34;: &#34;595 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_splitest.py::test_record_conversion&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;595 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests/test_splitest.py::test_api_get_variant&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_splitest.py::test_api_get_variant&#34;, &#34;duration&#34;: &#34;593 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_splitest.py::test_api_get_variant&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;593 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;\n\n    def test_api_get_variant(client):\n        &amp;quot;&amp;quot;&amp;quot;Test API endpoint to get a split test variant.&amp;quot;&amp;quot;&amp;quot;\n        response = client.get(&amp;#x27;/api/test/variant?page_id=1&amp;amp;test_type=content&amp;#x27;)\n    \n&amp;gt;       assert response.status_code == 200\nE       assert 404 == 200\nE        +  where 404 = &amp;lt;WrapperTestResponse streamed [404 NOT FOUND]&amp;gt;.status_code\n\ntests\\test_splitest.py:272: AssertionError\n&#34;}], &#34;tests/test_splitest.py::test_api_record_conversion&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_splitest.py::test_api_record_conversion&#34;, &#34;duration&#34;: &#34;606 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_splitest.py::test_api_record_conversion&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;606 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;client = &amp;lt;FlaskClient &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;&amp;gt;\n\n    def test_api_record_conversion(client):\n        &amp;quot;&amp;quot;&amp;quot;Test API endpoint to record a conversion.&amp;quot;&amp;quot;&amp;quot;\n        # First create a test visitor session\n        with client.application.app_context():\n            from app import db\n    \n            # Get test and variant\n            test = SplitTest.query.get(1)\n            variant = TestVariant.query.filter_by(test_id=test.id).first()\n    \n            # Create visitor session\n            visitor_id = &amp;quot;api_test_visitor&amp;quot;\n            session = VisitorSession(\n                split_test_id=test.id,\n                variant_id=variant.id,\n                visitor_id=visitor_id\n            )\n            db.session.add(session)\n            db.session.commit()\n    \n        # Set visitor cookie\n        client.set_cookie(&amp;#x27;localhost&amp;#x27;, &amp;#x27;visitor_id&amp;#x27;, visitor_id)\n    \n        # Record conversion\n        response = client.post(\n            &amp;#x27;/api/test/conversion&amp;#x27;,\n            json={\n                &amp;#x27;test_id&amp;#x27;: 1,\n&amp;gt;               &amp;#x27;variant_id&amp;#x27;: variant.id\n            }\n        )\n\ntests\\test_splitest.py:309: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \nvenv\\Lib\\site-packages\\sqlalchemy\\orm\\attributes.py:566: in __get__\n    return self.impl.get(state, dict_)  # type: ignore[no-any-return]\nvenv\\Lib\\site-packages\\sqlalchemy\\orm\\attributes.py:1086: in get\n    value = self._fire_loader_callables(state, key, passive)\nvenv\\Lib\\site-packages\\sqlalchemy\\orm\\attributes.py:1116: in _fire_loader_callables\n    return state._load_expired(state, passive)\nvenv\\Lib\\site-packages\\sqlalchemy\\orm\\state.py:803: in _load_expired\n    self.manager.expired_attribute_loader(self, toload, passive)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nmapper = &amp;lt;Mapper at 0x2595bd64500; TestVariant&amp;gt;, state = &amp;lt;sqlalchemy.orm.state.InstanceState object at 0x000002597F9CA3F0&amp;gt;\nattribute_names = {&amp;#x27;content_version&amp;#x27;, &amp;#x27;content_version_id&amp;#x27;, &amp;#x27;conversions&amp;#x27;, &amp;#x27;created_at&amp;#x27;, &amp;#x27;id&amp;#x27;, &amp;#x27;name&amp;#x27;, ...}, passive = symbol(&amp;#x27;PASSIVE_OFF&amp;#x27;)\n\n    def load_scalar_attributes(mapper, state, attribute_names, passive):\n        &amp;quot;&amp;quot;&amp;quot;initiate a column-based attribute refresh operation.&amp;quot;&amp;quot;&amp;quot;\n    \n        # assert mapper is _state_mapper(state)\n        session = state.session\n        if not session:\n&amp;gt;           raise orm_exc.DetachedInstanceError(\n                &amp;quot;Instance %s is not bound to a Session; &amp;quot;\n                &amp;quot;attribute refresh operation cannot proceed&amp;quot; % (state_str(state))\n            )\nE           sqlalchemy.orm.exc.DetachedInstanceError: Instance &amp;lt;TestVariant at 0x2597ec95400&amp;gt; is not bound to a Session; attribute refresh operation cannot proceed (Background on this error at: https://sqlalche.me/e/20/bhk3)\n\nvenv\\Lib\\site-packages\\sqlalchemy\\orm\\loading.py:1603: DetachedInstanceError\n&#34;}], &#34;tests/test_splitest.py::test_calculate_statistical_significance&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_splitest.py::test_calculate_statistical_significance&#34;, &#34;duration&#34;: &#34;638 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_splitest.py::test_calculate_statistical_significance&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;638 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;app = &amp;lt;Flask &amp;#x27;app&amp;#x27;&amp;gt;\n\n    def test_calculate_statistical_significance(app):\n        &amp;quot;&amp;quot;&amp;quot;Test calculation of statistical significance for test results.&amp;quot;&amp;quot;&amp;quot;\n        with app.app_context():\n            from app import db\n    \n            # Create a test with some data\n            test = SplitTest.query.get(1)\n            variants = test.variants.all()\n    \n            # Add some fake visitor sessions and conversions\n            for i in range(100):\n                # Control variant: 20% conversion\n                session1 = VisitorSession(\n                    split_test_id=test.id,\n                    variant_id=variants[0].id,\n                    visitor_id=f&amp;quot;stat_visitor_control_{i}&amp;quot;\n                )\n                db.session.add(session1)\n    \n                if i &amp;lt; 20:  # 20% conversion rate\n                    conversion1 = Conversion(\n                        split_test_id=test.id,\n                        variant_id=variants[0].id,\n                        visitor_id=f&amp;quot;stat_visitor_control_{i}&amp;quot;\n                    )\n                    db.session.add(conversion1)\n    \n                # Test variant: 30% conversion\n                session2 = VisitorSession(\n                    split_test_id=test.id,\n                    variant_id=variants[1].id,\n                    visitor_id=f&amp;quot;stat_visitor_test_{i}&amp;quot;\n                )\n                db.session.add(session2)\n    \n                if i &amp;lt; 30:  # 30% conversion rate\n                    conversion2 = Conversion(\n                        split_test_id=test.id,\n                        variant_id=variants[1].id,\n                        visitor_id=f&amp;quot;stat_visitor_test_{i}&amp;quot;\n                    )\n                    db.session.add(conversion2)\n    \n            db.session.commit()\n    \n            # Calculate significance\n            results = calculate_statistical_significance(test.id)\n    \n            assert results is not None\n            assert len(results) == 2\n    \n            # Check results for control\n            assert results[0][&amp;#x27;visitors&amp;#x27;] == 100\n            assert results[0][&amp;#x27;conversions&amp;#x27;] == 20\n            assert results[0][&amp;#x27;conversion_rate&amp;#x27;] == 20.0\n    \n            # Check results for test variant\n            assert results[1][&amp;#x27;visitors&amp;#x27;] == 100\n            assert results[1][&amp;#x27;conversions&amp;#x27;] == 30\n            assert results[1][&amp;#x27;conversion_rate&amp;#x27;] == 30.0\n&amp;gt;           assert &amp;#x27;relative_improvement&amp;#x27; in results[1]\nE           AssertionError: assert &amp;#x27;relative_improvement&amp;#x27; in {&amp;#x27;confidence_interval&amp;#x27;: [21.89475386622812, 39.585038432811956], &amp;#x27;conversion_rate&amp;#x27;: 30.0, &amp;#x27;conversions&amp;#x27;: 30, &amp;#x27;name&amp;#x27;: &amp;#x27;Variation&amp;#x27;, ...}\n\ntests\\test_splitest.py:387: AssertionError\n&#34;}]}, &#34;renderCollapsed&#34;: [&#34;passed&#34;], &#34;initialSort&#34;: &#34;result&#34;, &#34;title&#34;: &#34;test_report.html&#34;}"></div>
+    <script>
+      (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+const { getCollapsedCategory, setCollapsedIds } = require('./storage.js')
+
+class DataManager {
+    setManager(data) {
+        const collapsedCategories = [...getCollapsedCategory(data.renderCollapsed)]
+        const collapsedIds = []
+        const tests = Object.values(data.tests).flat().map((test, index) => {
+            const collapsed = collapsedCategories.includes(test.result.toLowerCase())
+            const id = `test_${index}`
+            if (collapsed) {
+                collapsedIds.push(id)
+            }
+            return {
+                ...test,
+                id,
+                collapsed,
+            }
+        })
+        const dataBlob = { ...data, tests }
+        this.data = { ...dataBlob }
+        this.renderData = { ...dataBlob }
+        setCollapsedIds(collapsedIds)
+    }
+
+    get allData() {
+        return { ...this.data }
+    }
+
+    resetRender() {
+        this.renderData = { ...this.data }
+    }
+
+    setRender(data) {
+        this.renderData.tests = [...data]
+    }
+
+    toggleCollapsedItem(id) {
+        this.renderData.tests = this.renderData.tests.map((test) =>
+            test.id === id ? { ...test, collapsed: !test.collapsed } : test,
+        )
+    }
+
+    set allCollapsed(collapsed) {
+        this.renderData = { ...this.renderData, tests: [...this.renderData.tests.map((test) => (
+            { ...test, collapsed }
+        ))] }
+    }
+
+    get testSubset() {
+        return [...this.renderData.tests]
+    }
+
+    get environment() {
+        return this.renderData.environment
+    }
+
+    get initialSort() {
+        return this.data.initialSort
+    }
+}
+
+module.exports = {
+    manager: new DataManager(),
+}
+
+},{"./storage.js":8}],2:[function(require,module,exports){
+const mediaViewer = require('./mediaviewer.js')
+const templateEnvRow = document.getElementById('template_environment_row')
+const templateResult = document.getElementById('template_results-table__tbody')
+
+function htmlToElements(html) {
+    const temp = document.createElement('template')
+    temp.innerHTML = html
+    return temp.content.childNodes
+}
+
+const find = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return elem.querySelector(selector)
+}
+
+const findAll = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return [...elem.querySelectorAll(selector)]
+}
+
+const dom = {
+    getStaticRow: (key, value) => {
+        const envRow = templateEnvRow.content.cloneNode(true)
+        const isObj = typeof value === 'object' && value !== null
+        const values = isObj ? Object.keys(value).map((k) => `${k}: ${value[k]}`) : null
+
+        const valuesElement = htmlToElements(
+            values ? `<ul>${values.map((val) => `<li>${val}</li>`).join('')}<ul>` : `<div>${value}</div>`)[0]
+        const td = findAll('td', envRow)
+        td[0].textContent = key
+        td[1].appendChild(valuesElement)
+
+        return envRow
+    },
+    getResultTBody: ({ testId, id, log, extras, resultsTableRow, tableHtml, result, collapsed }) => {
+        const resultBody = templateResult.content.cloneNode(true)
+        resultBody.querySelector('tbody').classList.add(result.toLowerCase())
+        resultBody.querySelector('tbody').id = testId
+        resultBody.querySelector('.collapsible').dataset.id = id
+
+        resultsTableRow.forEach((html) => {
+            const t = document.createElement('template')
+            t.innerHTML = html
+            resultBody.querySelector('.collapsible').appendChild(t.content)
+        })
+
+        if (log) {
+            // Wrap lines starting with "E" with span.error to color those lines red
+            const wrappedLog = log.replace(/^E.*$/gm, (match) => `<span class="error">${match}</span>`)
+            resultBody.querySelector('.log').innerHTML = wrappedLog
+        } else {
+            resultBody.querySelector('.log').remove()
+        }
+
+        if (collapsed) {
+            resultBody.querySelector('.collapsible > td')?.classList.add('collapsed')
+            resultBody.querySelector('.extras-row').classList.add('hidden')
+        } else {
+            resultBody.querySelector('.collapsible > td')?.classList.remove('collapsed')
+        }
+
+        const media = []
+        extras?.forEach(({ name, format_type, content }) => {
+            if (['image', 'video'].includes(format_type)) {
+                media.push({ path: content, name, format_type })
+            }
+
+            if (format_type === 'html') {
+                resultBody.querySelector('.extraHTML').insertAdjacentHTML('beforeend', `<div>${content}</div>`)
+            }
+        })
+        mediaViewer.setup(resultBody, media)
+
+        // Add custom html from the pytest_html_results_table_html hook
+        tableHtml?.forEach((item) => {
+            resultBody.querySelector('td[class="extra"]').insertAdjacentHTML('beforeend', item)
+        })
+
+        return resultBody
+    },
+}
+
+module.exports = {
+    dom,
+    htmlToElements,
+    find,
+    findAll,
+}
+
+},{"./mediaviewer.js":6}],3:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const storageModule = require('./storage.js')
+
+const getFilteredSubSet = (filter) =>
+    manager.allData.tests.filter(({ result }) => filter.includes(result.toLowerCase()))
+
+const doInitFilter = () => {
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+}
+
+const doFilter = (type, show) => {
+    if (show) {
+        storageModule.showCategory(type)
+    } else {
+        storageModule.hideCategory(type)
+    }
+
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+
+    const sortColumn = storageModule.getSort()
+    doSort(sortColumn, true)
+}
+
+module.exports = {
+    doFilter,
+    doInitFilter,
+}
+
+},{"./datamanager.js":1,"./sort.js":7,"./storage.js":8}],4:[function(require,module,exports){
+const { redraw, bindEvents, renderStatic } = require('./main.js')
+const { doInitFilter } = require('./filter.js')
+const { doInitSort } = require('./sort.js')
+const { manager } = require('./datamanager.js')
+const data = JSON.parse(document.getElementById('data-container').dataset.jsonblob)
+
+function init() {
+    manager.setManager(data)
+    doInitFilter()
+    doInitSort()
+    renderStatic()
+    redraw()
+    bindEvents()
+}
+
+init()
+
+},{"./datamanager.js":1,"./filter.js":3,"./main.js":5,"./sort.js":7}],5:[function(require,module,exports){
+const { dom, find, findAll } = require('./dom.js')
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const { doFilter } = require('./filter.js')
+const {
+    getVisible,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    getSortDirection,
+    possibleFilters,
+} = require('./storage.js')
+
+const removeChildren = (node) => {
+    while (node.firstChild) {
+        node.removeChild(node.firstChild)
+    }
+}
+
+const renderStatic = () => {
+    const renderEnvironmentTable = () => {
+        const environment = manager.environment
+        const rows = Object.keys(environment).map((key) => dom.getStaticRow(key, environment[key]))
+        const table = document.getElementById('environment')
+        removeChildren(table)
+        rows.forEach((row) => table.appendChild(row))
+    }
+    renderEnvironmentTable()
+}
+
+const addItemToggleListener = (elem) => {
+    elem.addEventListener('click', ({ target }) => {
+        const id = target.parentElement.dataset.id
+        manager.toggleCollapsedItem(id)
+
+        const collapsedIds = getCollapsedIds()
+        if (collapsedIds.includes(id)) {
+            const updated = collapsedIds.filter((item) => item !== id)
+            setCollapsedIds(updated)
+        } else {
+            collapsedIds.push(id)
+            setCollapsedIds(collapsedIds)
+        }
+        redraw()
+    })
+}
+
+const renderContent = (tests) => {
+    const sortAttr = getSort(manager.initialSort)
+    const sortAsc = JSON.parse(getSortDirection())
+    const rows = tests.map(dom.getResultTBody)
+    const table = document.getElementById('results-table')
+    const tableHeader = document.getElementById('results-table-head')
+
+    const newTable = document.createElement('table')
+    newTable.id = 'results-table'
+
+    // remove all sorting classes and set the relevant
+    findAll('.sortable', tableHeader).forEach((elem) => elem.classList.remove('asc', 'desc'))
+    tableHeader.querySelector(`.sortable[data-column-type="${sortAttr}"]`)?.classList.add(sortAsc ? 'desc' : 'asc')
+    newTable.appendChild(tableHeader)
+
+    if (!rows.length) {
+        const emptyTable = document.getElementById('template_results-table__body--empty').content.cloneNode(true)
+        newTable.appendChild(emptyTable)
+    } else {
+        rows.forEach((row) => {
+            if (!!row) {
+                findAll('.collapsible td:not(.col-links', row).forEach(addItemToggleListener)
+                find('.logexpander', row).addEventListener('click',
+                    (evt) => evt.target.parentNode.classList.toggle('expanded'),
+                )
+                newTable.appendChild(row)
+            }
+        })
+    }
+
+    table.replaceWith(newTable)
+}
+
+const renderDerived = () => {
+    const currentFilter = getVisible()
+    possibleFilters.forEach((result) => {
+        const input = document.querySelector(`input[data-test-result="${result}"]`)
+        input.checked = currentFilter.includes(result)
+    })
+}
+
+const bindEvents = () => {
+    const filterColumn = (evt) => {
+        const { target: element } = evt
+        const { testResult } = element.dataset
+
+        doFilter(testResult, element.checked)
+        const collapsedIds = getCollapsedIds()
+        const updated = manager.renderData.tests.map((test) => {
+            return {
+                ...test,
+                collapsed: collapsedIds.includes(test.id),
+            }
+        })
+        manager.setRender(updated)
+        redraw()
+    }
+
+    const header = document.getElementById('environment-header')
+    header.addEventListener('click', () => {
+        const table = document.getElementById('environment')
+        table.classList.toggle('hidden')
+        header.classList.toggle('collapsed')
+    })
+
+    findAll('input[name="filter_checkbox"]').forEach((elem) => {
+        elem.addEventListener('click', filterColumn)
+    })
+
+    findAll('.sortable').forEach((elem) => {
+        elem.addEventListener('click', (evt) => {
+            const { target: element } = evt
+            const { columnType } = element.dataset
+            doSort(columnType)
+            redraw()
+        })
+    })
+
+    document.getElementById('show_all_details').addEventListener('click', () => {
+        manager.allCollapsed = false
+        setCollapsedIds([])
+        redraw()
+    })
+    document.getElementById('hide_all_details').addEventListener('click', () => {
+        manager.allCollapsed = true
+        const allIds = manager.renderData.tests.map((test) => test.id)
+        setCollapsedIds(allIds)
+        redraw()
+    })
+}
+
+const redraw = () => {
+    const { testSubset } = manager
+
+    renderContent(testSubset)
+    renderDerived()
+}
+
+module.exports = {
+    redraw,
+    bindEvents,
+    renderStatic,
+}
+
+},{"./datamanager.js":1,"./dom.js":2,"./filter.js":3,"./sort.js":7,"./storage.js":8}],6:[function(require,module,exports){
+class MediaViewer {
+    constructor(assets) {
+        this.assets = assets
+        this.index = 0
+    }
+
+    nextActive() {
+        this.index = this.index === this.assets.length - 1 ? 0 : this.index + 1
+        return [this.activeFile, this.index]
+    }
+
+    prevActive() {
+        this.index = this.index === 0 ? this.assets.length - 1 : this.index -1
+        return [this.activeFile, this.index]
+    }
+
+    get currentIndex() {
+        return this.index
+    }
+
+    get activeFile() {
+        return this.assets[this.index]
+    }
+}
+
+
+const setup = (resultBody, assets) => {
+    if (!assets.length) {
+        resultBody.querySelector('.media').classList.add('hidden')
+        return
+    }
+
+    const mediaViewer = new MediaViewer(assets)
+    const container = resultBody.querySelector('.media-container')
+    const leftArrow = resultBody.querySelector('.media-container__nav--left')
+    const rightArrow = resultBody.querySelector('.media-container__nav--right')
+    const mediaName = resultBody.querySelector('.media__name')
+    const counter = resultBody.querySelector('.media__counter')
+    const imageEl = resultBody.querySelector('img')
+    const sourceEl = resultBody.querySelector('source')
+    const videoEl = resultBody.querySelector('video')
+
+    const setImg = (media, index) => {
+        if (media?.format_type === 'image') {
+            imageEl.src = media.path
+
+            imageEl.classList.remove('hidden')
+            videoEl.classList.add('hidden')
+        } else if (media?.format_type === 'video') {
+            sourceEl.src = media.path
+
+            videoEl.classList.remove('hidden')
+            imageEl.classList.add('hidden')
+        }
+
+        mediaName.innerText = media?.name
+        counter.innerText = `${index + 1} / ${assets.length}`
+    }
+    setImg(mediaViewer.activeFile, mediaViewer.currentIndex)
+
+    const moveLeft = () => {
+        const [media, index] = mediaViewer.prevActive()
+        setImg(media, index)
+    }
+    const doRight = () => {
+        const [media, index] = mediaViewer.nextActive()
+        setImg(media, index)
+    }
+    const openImg = () => {
+        window.open(mediaViewer.activeFile.path, '_blank')
+    }
+    if (assets.length === 1) {
+        container.classList.add('media-container--fullscreen')
+    } else {
+        leftArrow.addEventListener('click', moveLeft)
+        rightArrow.addEventListener('click', doRight)
+    }
+    imageEl.addEventListener('click', openImg)
+}
+
+module.exports = {
+    setup,
+}
+
+},{}],7:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const storageModule = require('./storage.js')
+
+const genericSort = (list, key, ascending, customOrder) => {
+    let sorted
+    if (customOrder) {
+        sorted = list.sort((a, b) => {
+            const aValue = a.result.toLowerCase()
+            const bValue = b.result.toLowerCase()
+
+            const aIndex = customOrder.findIndex((item) => item.toLowerCase() === aValue)
+            const bIndex = customOrder.findIndex((item) => item.toLowerCase() === bValue)
+
+            // Compare the indices to determine the sort order
+            return aIndex - bIndex
+        })
+    } else {
+        sorted = list.sort((a, b) => a[key] === b[key] ? 0 : a[key] > b[key] ? 1 : -1)
+    }
+
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const durationSort = (list, ascending) => {
+    const parseDuration = (duration) => {
+        if (duration.includes(':')) {
+            // If it's in the format "HH:mm:ss"
+            const [hours, minutes, seconds] = duration.split(':').map(Number)
+            return (hours * 3600 + minutes * 60 + seconds) * 1000
+        } else {
+            // If it's in the format "nnn ms"
+            return parseInt(duration)
+        }
+    }
+    const sorted = list.sort((a, b) => parseDuration(a['duration']) - parseDuration(b['duration']))
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const doInitSort = () => {
+    const type = storageModule.getSort(manager.initialSort)
+    const ascending = storageModule.getSortDirection()
+    const list = manager.testSubset
+    const initialOrder = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed', 'Skipped', 'Passed']
+
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    if (type?.toLowerCase() === 'original') {
+        manager.setRender(list)
+    } else {
+        let sortedList
+        switch (type) {
+        case 'duration':
+            sortedList = durationSort(list, ascending)
+            break
+        case 'result':
+            sortedList = genericSort(list, type, ascending, initialOrder)
+            break
+        default:
+            sortedList = genericSort(list, type, ascending)
+            break
+        }
+        manager.setRender(sortedList)
+    }
+}
+
+const doSort = (type, skipDirection) => {
+    const newSortType = storageModule.getSort(manager.initialSort) !== type
+    const currentAsc = storageModule.getSortDirection()
+    let ascending
+    if (skipDirection) {
+        ascending = currentAsc
+    } else {
+        ascending = newSortType ? false : !currentAsc
+    }
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    const list = manager.testSubset
+    const sortedList = type === 'duration' ? durationSort(list, ascending) : genericSort(list, type, ascending)
+    manager.setRender(sortedList)
+}
+
+module.exports = {
+    doInitSort,
+    doSort,
+}
+
+},{"./datamanager.js":1,"./storage.js":8}],8:[function(require,module,exports){
+const possibleFilters = [
+    'passed',
+    'skipped',
+    'failed',
+    'error',
+    'xfailed',
+    'xpassed',
+    'rerun',
+]
+
+const getVisible = () => {
+    const url = new URL(window.location.href)
+    const settings = new URLSearchParams(url.search).get('visible')
+    const lower = (item) => {
+        const lowerItem = item.toLowerCase()
+        if (possibleFilters.includes(lowerItem)) {
+            return lowerItem
+        }
+        return null
+    }
+    return settings === null ?
+        possibleFilters :
+        [...new Set(settings?.split(',').map(lower).filter((item) => item))]
+}
+
+const hideCategory = (categoryToHide) => {
+    const url = new URL(window.location.href)
+    const visibleParams = new URLSearchParams(url.search).get('visible')
+    const currentVisible = visibleParams ? visibleParams.split(',') : [...possibleFilters]
+    const settings = [...new Set(currentVisible)].filter((f) => f !== categoryToHide).join(',')
+
+    url.searchParams.set('visible', settings)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const showCategory = (categoryToShow) => {
+    if (typeof window === 'undefined') {
+        return
+    }
+    const url = new URL(window.location.href)
+    const currentVisible = new URLSearchParams(url.search).get('visible')?.split(',').filter(Boolean) ||
+        [...possibleFilters]
+    const settings = [...new Set([categoryToShow, ...currentVisible])]
+    const noFilter = possibleFilters.length === settings.length || !settings.length
+
+    noFilter ? url.searchParams.delete('visible') : url.searchParams.set('visible', settings.join(','))
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getSort = (initialSort) => {
+    const url = new URL(window.location.href)
+    let sort = new URLSearchParams(url.search).get('sort')
+    if (!sort) {
+        sort = initialSort || 'result'
+    }
+    return sort
+}
+
+const setSort = (type) => {
+    const url = new URL(window.location.href)
+    url.searchParams.set('sort', type)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getCollapsedCategory = (renderCollapsed) => {
+    let categories
+    if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+        const collapsedItems = new URLSearchParams(url.search).get('collapsed')
+        switch (true) {
+        case !renderCollapsed && collapsedItems === null:
+            categories = ['passed']
+            break
+        case collapsedItems?.length === 0 || /^["']{2}$/.test(collapsedItems):
+            categories = []
+            break
+        case /^all$/.test(collapsedItems) || collapsedItems === null && /^all$/.test(renderCollapsed):
+            categories = [...possibleFilters]
+            break
+        default:
+            categories = collapsedItems?.split(',').map((item) => item.toLowerCase()) || renderCollapsed
+            break
+        }
+    } else {
+        categories = []
+    }
+    return categories
+}
+
+const getSortDirection = () => JSON.parse(sessionStorage.getItem('sortAsc')) || false
+const setSortDirection = (ascending) => sessionStorage.setItem('sortAsc', ascending)
+
+const getCollapsedIds = () => JSON.parse(sessionStorage.getItem('collapsedIds')) || []
+const setCollapsedIds = (list) => sessionStorage.setItem('collapsedIds', JSON.stringify(list))
+
+module.exports = {
+    getVisible,
+    hideCategory,
+    showCategory,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    setSort,
+    getSortDirection,
+    setSortDirection,
+    getCollapsedCategory,
+    possibleFilters,
+}
+
+},{}]},{},[4]);
+    </script>
+  </footer>
+</html>

@@ -1,0 +1,200 @@
+/* Main Styles for Streamlined CMS */
+
+/* Base Styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    flex: 1;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+/* Card Styles */
+.card {
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    font-weight: bold;
+}
+
+/* Dashboard Cards */
+.dashboard-card {
+    transition: transform 0.2s;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.dashboard-card .card-body {
+    min-height: 120px;
+}
+
+.dashboard-card .card-title {
+    color: #007bff;
+}
+
+.dashboard-card .card-text {
+    color: #6c757d;
+}
+
+/* Website Cards */
+.website-card {
+    border-left: 4px solid #007bff;
+}
+
+/* Page Cards */
+.page-card {
+    border-left: 4px solid #28a745;
+}
+
+/* Test Cards */
+.test-card {
+    border-left: 4px solid #fd7e14;
+}
+
+/* Form Styles */
+.form-group label {
+    font-weight: bold;
+}
+
+/* Button Styles */
+.btn-icon {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    border-radius: 0.2rem;
+}
+
+/* Table Styles */
+.table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+
+/* Stat Boxes */
+.stat-box {
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 0.25rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.stat-box h4 {
+    margin-bottom: 0.5rem;
+    color: #007bff;
+}
+
+.stat-box p {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0;
+}
+
+/* Split Test Results */
+.variant-row {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 0.25rem;
+    border-left: 4px solid #6c757d;
+}
+
+.variant-row.winner {
+    background-color: #d4edda;
+    border-left: 4px solid #28a745;
+}
+
+.variant-row.control {
+    background-color: #e2e3e5;
+    border-left: 4px solid #6c757d;
+}
+
+/* Editor Styles */
+.editor-preview {
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    padding: 1rem;
+    background-color: #fff;
+    margin-bottom: 1rem;
+    min-height: 200px;
+}
+
+/* Progress Bars */
+.progress {
+    height: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+/* Badges */
+.badge-active {
+    background-color: #28a745;
+    color: white;
+}
+
+.badge-inactive {
+    background-color: #6c757d;
+    color: white;
+}
+
+.badge-running {
+    background-color: #007bff;
+    color: white;
+}
+
+.badge-completed {
+    background-color: #6c757d;
+    color: white;
+}
+
+/* Icons */
+.icon-action {
+    cursor: pointer;
+    color: #6c757d;
+    margin-right: 0.5rem;
+}
+
+.icon-action:hover {
+    color: #007bff;
+}
+
+/* Markdown Content */
+.markdown-content img {
+    max-width: 100%;
+    height: auto;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3 {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.markdown-content pre {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    overflow-x: auto;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .card-deck {
+        display: block;
+    }
+    
+    .card-deck .card {
+        margin-bottom: 1rem;
+    }
+}
