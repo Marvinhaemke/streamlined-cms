@@ -83,10 +83,11 @@ def test_detail(test_id):
     return render_template('splitest/test_detail.html', title=test.name, test=test, 
                           variants=variants, stats=stats)
 
+# Change this route to match the endpoint used in the test
 @bp.route('/test/<int:test_id>/variant/add', methods=['GET', 'POST'])
 @login_required
 @marketer_required
-def add_variant_route(test_id):
+def add_variant(test_id):
     """Add a variant to a split test."""
     test = SplitTest.query.get_or_404(test_id)
     page = Page.query.get(test.page_id)
@@ -104,13 +105,13 @@ def add_variant_route(test_id):
         
         if not name or not content_version_id:
             flash('Name and content version are required', 'danger')
-            return redirect(url_for('splitest.add_variant_route', test_id=test.id))
+            return redirect(url_for('splitest.add_variant', test_id=test.id))
         
         # Verify content version exists and is correct type
         content_version = ContentVersion.query.get(content_version_id)
         if not content_version or content_version.page_id != page.id or content_version.version_type != test.test_type:
             flash('Invalid content version', 'danger')
-            return redirect(url_for('splitest.add_variant_route', test_id=test.id))
+            return redirect(url_for('splitest.add_variant', test_id=test.id))
         
         # Add variant
         variant = add_variant(test.id, name, content_version_id, weight)
@@ -120,6 +121,14 @@ def add_variant_route(test_id):
     
     return render_template('splitest/add_variant.html', title='Add Variant', test=test, 
                           page=page, versions=versions)
+
+# Keep this route for backward compatibility
+@bp.route('/test/<int:test_id>/variant/add', methods=['GET', 'POST'])
+@login_required
+@marketer_required
+def add_variant_route(test_id):
+    """Redirect to the standard add_variant route for backward compatibility."""
+    return redirect(url_for('splitest.add_variant', test_id=test_id))
 
 @bp.route('/test/<int:test_id>/start', methods=['POST'])
 @login_required

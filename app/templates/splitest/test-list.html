@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Split Tests - Streamlined CMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Split Tests</h1>
+</div>
+
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">All Tests</h5>
+    </div>
+    <div class="card-body">
+        {% if tests %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Website</th>
+                        <th>Page</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for test in tests %}
+                    <tr>
+                        <td>{{ test.name }}</td>
+                        <td>{{ test.page.website.name }}</td>
+                        <td>{{ test.page.title }}</td>
+                        <td>{{ test.test_type|capitalize }}</td>
+                        <td>
+                            {% if test.is_active %}
+                            <span class="badge badge-success">Active</span>
+                            {% else %}
+                            <span class="badge badge-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ test.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            <a href="{{ url_for('splitest.test_detail', test_id=test.id) }}" class="btn btn-sm btn-info">Details</a>
+                            
+                            {% if current_user.is_marketer() %}
+                                {% if test.is_active %}
+                                <form action="{{ url_for('splitest.stop_test', test_id=test.id) }}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-danger">Stop</button>
+                                </form>
+                                {% else %}
+                                <form action="{{ url_for('splitest.start_test', test_id=test.id) }}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-success">Start</button>
+                                </form>
+                                {% endif %}
+                                
+                                <form action="{{ url_for('splitest.delete_test', test_id=test.id) }}" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this test?');">
+                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No split tests found.</p>
+        <div class="alert alert-info">
+            <p>To create a new split test:</p>
+            <ol>
+                <li>Go to a website page</li>
+                <li>Click "Add Split Test"</li>
+                <li>Configure your test variants</li>
+            </ol>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if current_user.is_marketer() %}
+<div class="card mt-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Create a New Test</h5>
+    </div>
+    <div class="card-body">
+        <p>To create a new split test, go to the page you want to test and select the "Add Split Test" option.</p>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">Content Test</h6>
+                    </div>
+                    <div class="card-body">
+                        <p>Test different headlines, text, or images on the same page design.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">Design Test</h6>
+                    </div>
+                    <div class="card-body">
+                        <p>Test completely different page designs or layouts.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

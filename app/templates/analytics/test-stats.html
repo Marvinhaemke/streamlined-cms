@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}Test Results - {{ test.name }} - Streamlined CMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>{{ test.name }}</h1>
+        <div class="d-flex align-items-center">
+            <h5 class="text-muted mr-3">{{ test.page.website.domain }}{{ test.page.path }}</h5>
+            {% if test.is_active %}
+            <span class="badge badge-success">Active</span>
+            {% else %}
+            <span class="badge badge-secondary">Inactive</span>
+            {% endif %}
+        </div>
+    </div>
+    <div>
+        <a href="{{ url_for('analytics.export_test_data', test_id=test.id) }}" class="btn btn-secondary mr-2">Export CSV</a>
+        {% if test.is_active %}
+        <form action="{{ url_for('splitest.stop_test', test_id=test.id) }}" method="post" class="d-inline">
+            <button type="submit" class="btn btn-danger">Stop Test</button>
+        </form>
+        {% else %}
+        <form action="{{ url_for('splitest.start_test', test_id=test.id) }}" method="post" class="d-inline">
+            <button type="submit" class="btn btn-success">Restart Test</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <!-- Key Metrics -->
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Key Metrics</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="stat-box">
+                            <h4>Total Visitors</h4>
+                            <p>{{ total_visitors }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-box">
+                            <h4>Total Conversions</h4>
+                            <p>{{ total_conversions }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-box">
+                            <h4>Avg. Conversion Rate</h4>
+                            <p>{{ "%.2f"|format(avg_conversion_rate) }}%</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-box">
+                            <h4>Duration</h4>
+                            <p>
+                            {% if test.end_date %}
+                                {{ (test.end_date - test.start_date).days }} days
+                            {% else %}
+                                {{ (now() - test.start_date).days }} days (ongoing)
+                            {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Results -->
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Variant Results</h5>
+            </div>
+            <div class="card-body">
+                {% if results %}
+                <div class="mb-4">
+                    <canvas id="conversionChart" height="100"></canvas>
+                </div>
+                
+                <div class="row">
+                    {% for result in results %}
+                    <div class="col-md-12 mb-3">
+                        <div class="variant-row {% if loop.first %}control{% endif %} {% if loop.first == false and result.significant %}winner{% endif %}">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <h5>{{ result.name }}</h5>
+                                    <small class="text-muted">{% if loop.first %}Control{% else %}Variant{% endif %}</small>
+                                </div>
+                                <div class="col-md-2">
+                                    <strong>Visitors:</strong> {{ result.visitors }}
+                                </div>
+                                <div class="col-md-2">
+                                    <strong>Conversions:</strong> {{ result.conversions }}
+                                </div>
+                                <div class="col-md-2">
+                                    <strong>Rate:</strong> {{ "%.2f"|format(result.conversion_rate) }}%
+                                </div>
+                                <div class="col-md-3">
+                                    {% if not loop.first and result.relative_improvement %}
+                                    <strong>Improvement:</strong> 
+                                    <span class="{% if result.relative_improvement > 0 %}text-success{% else %}text-danger{% endif %}">
+                                        {{ "%.2f"|format(result.relative_improvement) }}%
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-md-12">
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" style="width: {{ result.conversion_rate }}%" aria-valuenow="{{ result.conversion_rate }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if result.confidence_interval %}
+                            <div class="row mt-2">
+                                <div class="col-md-12">
+                                    <small class="text-muted">
+                                        95% Confidence Interval: {{ "%.2f"|format(result.confidence_interval[0]) }}% - {{ "%.2f"|format(result.confidence_interval[1]) }}%
+                                    </small>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">No test data available yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Test Information -->
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Test Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Test Type:</strong> {{ test.test_type|capitalize }}</p>
+                        <p><strong>Goal Page:</strong> {{ test.goal_page.title }}</p>
+                        <p><strong>Start Date:</strong> {{ test.start_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                        {% if test.end_date %}
+                        <p><strong>End Date:</strong> {{ test.end_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Created By:</strong> {{ test.creator.username }}</p>
+                        <p><strong>Number of Variants:</strong> {{ test.variants.count() }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if results %}
+        // Data for conversion chart
+        const labels = [
+            {% for result in results %}
+                "{{ result.name }}",
+            {% endfor %}
+        ];
+        
+        const conversionRates = [
+            {% for result in results %}
+                {{ result.conversion_rate }},
+            {% endfor %}
+        ];
+        
+        const backgroundColors = [
+            {% for result in results %}
+                {% if loop.first %}
+                    'rgba(108, 117, 125, 0.6)',  // Control variant (gray)
+                {% else %}
+                    {% if result.significant %}
+                        'rgba(40, 167, 69, 0.6)',  // Significant improvement (green)
+                    {% else %}
+                        'rgba(0, 123, 255, 0.6)',  // Not significant (blue)
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        ];
+        
+        const borderColors = [
+            {% for result in results %}
+                {% if loop.first %}
+                    'rgba(108, 117, 125, 1)',  // Control variant (gray)
+                {% else %}
+                    {% if result.significant %}
+                        'rgba(40, 167, 69, 1)',  // Significant improvement (green)
+                    {% else %}
+                        'rgba(0, 123, 255, 1)',  // Not significant (blue)
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        ];
+        
+        // Create conversion chart
+        const ctx = document.getElementById('conversionChart').getContext('2d');
+        const conversionChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Conversion Rate (%)',
+                    data: conversionRates,
+                    backgroundColor: backgroundColors,
+                    borderColor: borderColors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Conversion Rate (%)'
+                        }
+                    }
+                }
+            }
+        });
+        {% endif %}
+    });
+</script>
+{% endblock %}

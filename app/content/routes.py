@@ -20,6 +20,7 @@ def dashboard():
     websites = Website.query.all()
     return render_template('content/dashboard.html', title='Dashboard', websites=websites)
 
+# Updated routes to match what tests expect
 @bp.route('/website/new', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -57,6 +58,7 @@ def new_website():
     
     return render_template('content/new_website.html', title='New Website')
 
+# Add route for content module but using the expected URL path
 @bp.route('/website/<int:website_id>')
 @login_required
 def website_detail(website_id):
@@ -121,6 +123,7 @@ def upload_website_files(website_id):
     
     return render_template('content/upload_files.html', title='Upload Files', website=website)
 
+# Added route for page_detail in the expected URL path 
 @bp.route('/page/<int:page_id>')
 @login_required
 def page_detail(page_id):
@@ -130,6 +133,7 @@ def page_detail(page_id):
     
     return render_template('content/page_detail.html', title=page.title, page=page, content_versions=content_versions)
 
+# Add route in the expected URL path
 @bp.route('/page/new/<int:website_id>', methods=['GET', 'POST'])
 @login_required
 @admin_required

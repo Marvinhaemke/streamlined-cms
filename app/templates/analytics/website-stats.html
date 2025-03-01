@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Website Analytics - {{ website.name }} - Streamlined CMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>{{ website.name }}</h1>
+        <h5 class="text-muted">{{ website.domain }}</h5>
+    </div>
+    <div>
+        <div class="btn-group" role="group">
+            <a href="{{ url_for('analytics.website_stats', website_id=website.id, days=7) }}" class="btn btn-outline-primary {% if days == 7 %}active{% endif %}">7 Days</a>
+            <a href="{{ url_for('analytics.website_stats', website_id=website.id, days=30) }}" class="btn btn-outline-primary {% if days == 30 %}active{% endif %}">30 Days</a>
+            <a href="{{ url_for('analytics.website_stats', website_id=website.id, days=90) }}" class="btn btn-outline-primary {% if days == 90 %}active{% endif %}">90 Days</a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Key Metrics -->
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Key Metrics (Last {{ days }} Days)</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="stat-box">
+                            <h4>Total Page Views</h4>
+                            <p>{{ stats.total_views }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-box">
+                            <h4>Unique Visitors</h4>
+                            <p>{{ stats.unique_visitors }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-box">
+                            <h4>Pages</h4>
+                            <p>{{ pages|length }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-box">
+                            <h4>Avg. Views per Visitor</h4>
+                            <p>{{ (stats.total_views / stats.unique_visitors)|round(1) if stats.unique_visitors > 0 else 0 }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Traffic Over Time -->
+    <div class="col-md-8 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Traffic Over Time</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="trafficChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Pages -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Top Pages</h5>
+            </div>
+            <div class="card-body">
+                {% if stats.views_by_page %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Page</th>
+                                <th>Views</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for page_id, views in stats.views_by_page.items()|sort(reverse=True, attribute='1') %}
+                            <tr>
+                                {% for page in pages %}
+                                    {% if page.id|string == page_id|string %}
+                                    <td>{{ page.title }}</td>
+                                    {% endif %}
+                                {% endfor %}
+                                <td>{{ views }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">No page view data available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Page List -->
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">All Pages</h5>
+            </div>
+            <div class="card-body">
+                {% if pages %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Page</th>
+                                <th>Path</th>
+                                <th>Views</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for page in pages %}
+                            <tr>
+                                <td>{{ page.title }}</td>
+                                <td>{{ page.path }}</td>
+                                <td>{{ stats.views_by_page.get(page.id|string, 0) }}</td>
+                                <td>
+                                    <a href="{{ url_for('analytics.page_stats', page_id=page.id) }}" class="btn btn-sm btn-info">Details</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">No pages found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Data for traffic chart
+        const dates = [
+            {% for date, views in stats.views_by_date.items() %}
+                "{{ date }}",
+            {% endfor %}
+        ];
+        
+        const viewCounts = [
+            {% for date, views in stats.views_by_date.items() %}
+                {{ views }},
+            {% endfor %}
+        ];
+        
+        // Create traffic chart
+        const ctx = document.getElementById('trafficChart').getContext('2d');
+        const trafficChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: 'Page Views',
+                    data: viewCounts,
+                    backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                    borderColor: 'rgba(0, 123, 255, 1)',
+                    borderWidth: 2,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

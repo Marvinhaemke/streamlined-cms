@@ -245,6 +245,6 @@ def get_website_stats(website_id, days=30):
     return {
         'total_views': total_views,
         'unique_visitors': unique_visitors,
-        'views_by_page': dict(views_by_page),
+        'views_by_page': views_by_page,
         'views_by_date': date_results
     }

@@ -1,0 +1,1891 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.6, pytest-7.4.3, pluggy-1.5.0 -- C:\Users\pc\Programming Projects\streamlined-cms\venv\Scripts\python.exe
+cachedir: .pytest_cache
+metadata: {'Python': '3.12.6', 'Platform': 'Windows-11-10.0.22631-SP0', 'Packages': {'pytest': '7.4.3', 'pluggy': '1.5.0'}, 'Plugins': {'cov': '4.1.0', 'flask': '1.3.0', 'html': '4.1.1', 'metadata': '3.1.1'}}
+rootdir: C:\Users\pc\Programming Projects\streamlined-cms
+configfile: pytest.ini
+plugins: cov-4.1.0, flask-1.3.0, html-4.1.1, metadata-3.1.1
+collecting ... collected 46 items
+
+tests/test_analytics.py::test_record_page_view PASSED                    [  2%]
+tests/test_analytics.py::test_anonymize_ip PASSED                        [  4%]
+tests/test_analytics.py::test_get_page_views_by_date PASSED              [  6%]
+tests/test_analytics.py::test_get_test_results PASSED                    [  8%]
+tests/test_analytics.py::test_get_website_stats FAILED                   [ 10%]
+tests/test_analytics.py::test_analytics_dashboard FAILED                 [ 13%]
+tests/test_analytics.py::test_website_stats_page FAILED                  [ 15%]
+tests/test_analytics.py::test_page_stats_page FAILED                     [ 17%]
+tests/test_analytics.py::test_test_stats_page FAILED                     [ 19%]
+tests/test_analytics.py::test_api_record_view FAILED                     [ 21%]
+tests/test_analytics.py::test_export_test_data FAILED                    [ 23%]
+tests/test_analytics.py::test_access_control FAILED                      [ 26%]
+tests/test_auth.py::test_login_page PASSED                               [ 28%]
+tests/test_auth.py::test_login_success FAILED                            [ 30%]
+tests/test_auth.py::test_login_incorrect_password FAILED                 [ 32%]
+tests/test_auth.py::test_login_invalid_username FAILED                   [ 34%]
+tests/test_auth.py::test_logout PASSED                                   [ 36%]
+tests/test_auth.py::test_user_roles PASSED                               [ 39%]
+tests/test_auth.py::test_register_user FAILED                            [ 41%]
+tests/test_auth.py::test_admin_access_required PASSED                    [ 43%]
+tests/test_auth.py::test_change_password FAILED                          [ 45%]
+tests/test_auth.py::test_change_password_wrong_current FAILED            [ 47%]
+tests/test_content.py::test_dashboard_access PASSED                      [ 50%]
+tests/test_content.py::test_website_detail FAILED                        [ 52%]
+tests/test_content.py::test_create_website FAILED                        [ 54%]
+tests/test_content.py::test_create_page FAILED                           [ 56%]
+tests/test_content.py::test_api_get_page_content FAILED                  [ 58%]
+tests/test_content.py::test_api_save_page_content FAILED                 [ 60%]
+tests/test_content.py::test_parse_html_content PASSED                    [ 63%]
+tests/test_content.py::test_apply_content_changes PASSED                 [ 65%]
+tests/test_content.py::test_page_detail FAILED                           [ 67%]
+tests/test_content.py::test_edit_page FAILED                             [ 69%]
+tests/test_content.py::test_content_version_activation FAILED            [ 71%]
+tests/test_integration.py::test_end_to_end_flow FAILED                   [ 73%]
+tests/test_integration.py::test_different_user_roles FAILED              [ 76%]
+tests/test_splitest.py::test_test_list FAILED                            [ 78%]
+tests/test_splitest.py::test_test_detail FAILED                          [ 80%]
+tests/test_splitest.py::test_create_test FAILED                          [ 82%]
+tests/test_splitest.py::test_add_variant FAILED                          [ 84%]
+tests/test_splitest.py::test_start_stop_test FAILED                      [ 86%]
+tests/test_splitest.py::test_get_visitor_id FAILED                       [ 89%]
+tests/test_splitest.py::test_assign_variant PASSED                       [ 91%]
+tests/test_splitest.py::test_record_conversion PASSED                    [ 93%]
+tests/test_splitest.py::test_api_get_variant FAILED                      [ 95%]
+tests/test_splitest.py::test_api_record_conversion FAILED                [ 97%]
+tests/test_splitest.py::test_calculate_statistical_significance FAILED   [100%]
+
+================================== FAILURES ===================================
+___________________________ test_get_website_stats ____________________________
+
+app = <Flask 'app'>
+
+    def test_get_website_stats(app):
+        """Test getting overall website statistics."""
+        with app.app_context():
+            from app import db
+    
+            # Add some page views for different pages
+            website_id = 1
+    
+            # Add views for each page
+            page_ids = [1, 2, 3]  # Home, About, Contact
+    
+            for page_id in page_ids:
+                for i in range(page_id * 10):  # Different number for each page
+                    view = PageView(
+                        page_id=page_id,
+                        visitor_id=f"stats_visitor_{page_id}_{i % 5}",  # Some duplicates
+                        created_at=datetime.utcnow() - timedelta(days=i % 3)
+                    )
+                    db.session.add(view)
+    
+            db.session.commit()
+    
+            # Get website stats
+            stats = get_website_stats(website_id, days=7)
+    
+            assert stats is not None
+            assert 'total_views' in stats
+            assert 'unique_visitors' in stats
+            assert 'views_by_page' in stats
+            assert 'views_by_date' in stats
+    
+            assert stats['total_views'] == 10 + 20 + 30  # Sum of all page views
+            assert stats['unique_visitors'] <= stats['total_views']  # Should be fewer unique visitors
+    
+            # Check views by page
+            assert len(stats['views_by_page']) == 3
+>           assert stats['views_by_page'].get('1') == 10
+E           AssertionError: assert None == 10
+E            +  where None = <built-in method get of dict object at 0x000001FE198402C0>('1')
+E            +    where <built-in method get of dict object at 0x000001FE198402C0> = {1: 10, 2: 20, 3: 30}.get
+
+tests\test_analytics.py:210: AssertionError
+__________________________ test_analytics_dashboard ___________________________
+
+client = <FlaskClient <Flask 'app'>>
+auth = <conftest.auth.<locals>.AuthActions object at 0x000001FE19B19F40>
+
+    def test_analytics_dashboard(client, auth):
+        """Test analytics dashboard page."""
+        auth.login()
+>       response = client.get('/analytics/dashboard')
+
+tests\test_analytics.py:221: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+venv\Lib\site-packages\werkzeug\test.py:1243: in get
+    return self.open(*args, **kw)
+venv\Lib\site-packages\flask\testing.py:232: in open
+    response = super().open(
+venv\Lib\site-packages\werkzeug\test.py:1197: in open
+    response = self.run_wsgi_app(request.environ, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1069: in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1345: in run_wsgi_app
+    app_rv = app(environ, start_response)
+venv\Lib\site-packages\flask\app.py:2213: in __call__
+    return self.wsgi_app(environ, start_response)
+venv\Lib\site-packages\flask\app.py:2193: in wsgi_app
+    response = self.handle_exception(e)
+venv\Lib\site-packages\flask\app.py:2190: in wsgi_app
+    response = self.full_dispatch_request()
+venv\Lib\site-packages\flask\app.py:1486: in full_dispatch_request
+    rv = self.handle_user_exception(e)
+venv\Lib\site-packages\flask\app.py:1484: in full_dispatch_request
+    rv = self.dispatch_request()
+venv\Lib\site-packages\flask\app.py:1469: in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+venv\Lib\site-packages\flask_login\utils.py:290: in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+app\analytics\routes.py:24: in dashboard
+    return render_template('analytics/dashboard.html', title='Analytics Dashboard',
+venv\Lib\site-packages\flask\templating.py:150: in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+venv\Lib\site-packages\jinja2\environment.py:1087: in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+venv\Lib\site-packages\jinja2\environment.py:1016: in get_template
+    return self._load_template(name, globals)
+venv\Lib\site-packages\jinja2\environment.py:975: in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+venv\Lib\site-packages\jinja2\loaders.py:126: in load
+    source, filename, uptodate = self.get_source(environment, name)
+venv\Lib\site-packages\flask\templating.py:64: in get_source
+    return self._get_source_fast(environment, template)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <flask.templating.DispatchingJinjaLoader object at 0x000001FE19ABC770>
+environment = <flask.templating.Environment object at 0x000001FE19ABC710>
+template = 'analytics/dashboard.html'
+
+    def _get_source_fast(
+        self, environment: Environment, template: str
+    ) -> tuple[str, str | None, t.Callable | None]:
+        for _srcobj, loader in self._iter_loaders(template):
+            try:
+                return loader.get_source(environment, template)
+            except TemplateNotFound:
+                continue
+>       raise TemplateNotFound(template)
+E       jinja2.exceptions.TemplateNotFound: analytics/dashboard.html
+
+venv\Lib\site-packages\flask\templating.py:98: TemplateNotFound
+___________________________ test_website_stats_page ___________________________
+
+client = <FlaskClient <Flask 'app'>>
+auth = <conftest.auth.<locals>.AuthActions object at 0x000001FE19BA4A70>
+
+    def test_website_stats_page(client, auth):
+        """Test website stats page."""
+        auth.login()
+>       response = client.get('/analytics/website/1')
+
+tests\test_analytics.py:230: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+venv\Lib\site-packages\werkzeug\test.py:1243: in get
+    return self.open(*args, **kw)
+venv\Lib\site-packages\flask\testing.py:232: in open
+    response = super().open(
+venv\Lib\site-packages\werkzeug\test.py:1197: in open
+    response = self.run_wsgi_app(request.environ, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1069: in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1345: in run_wsgi_app
+    app_rv = app(environ, start_response)
+venv\Lib\site-packages\flask\app.py:2213: in __call__
+    return self.wsgi_app(environ, start_response)
+venv\Lib\site-packages\flask\app.py:2193: in wsgi_app
+    response = self.handle_exception(e)
+venv\Lib\site-packages\flask\app.py:2190: in wsgi_app
+    response = self.full_dispatch_request()
+venv\Lib\site-packages\flask\app.py:1486: in full_dispatch_request
+    rv = self.handle_user_exception(e)
+venv\Lib\site-packages\flask\app.py:1484: in full_dispatch_request
+    rv = self.dispatch_request()
+venv\Lib\site-packages\flask\app.py:1469: in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+venv\Lib\site-packages\flask_login\utils.py:290: in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+app\analytics\routes.py:42: in website_stats
+    return render_template('analytics/website_stats.html', title=f'Analytics for {website.name}',
+venv\Lib\site-packages\flask\templating.py:150: in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+venv\Lib\site-packages\jinja2\environment.py:1087: in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+venv\Lib\site-packages\jinja2\environment.py:1016: in get_template
+    return self._load_template(name, globals)
+venv\Lib\site-packages\jinja2\environment.py:975: in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+venv\Lib\site-packages\jinja2\loaders.py:126: in load
+    source, filename, uptodate = self.get_source(environment, name)
+venv\Lib\site-packages\flask\templating.py:64: in get_source
+    return self._get_source_fast(environment, template)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <flask.templating.DispatchingJinjaLoader object at 0x000001FE19B46E10>
+environment = <flask.templating.Environment object at 0x000001FE19B46DB0>
+template = 'analytics/website_stats.html'
+
+    def _get_source_fast(
+        self, environment: Environment, template: str
+    ) -> tuple[str, str | None, t.Callable | None]:
+        for _srcobj, loader in self._iter_loaders(template):
+            try:
+                return loader.get_source(environment, template)
+            except TemplateNotFound:
+                continue
+>       raise TemplateNotFound(template)
+E       jinja2.exceptions.TemplateNotFound: analytics/website_stats.html
+
+venv\Lib\site-packages\flask\templating.py:98: TemplateNotFound
+____________________________ test_page_stats_page _____________________________
+
+client = <FlaskClient <Flask 'app'>>
+auth = <conftest.auth.<locals>.AuthActions object at 0x000001FE1AFA47A0>
+
+    def test_page_stats_page(client, auth):
+        """Test page stats page."""
+        auth.login()
+>       response = client.get('/analytics/page/1')
+
+tests\test_analytics.py:239: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+venv\Lib\site-packages\werkzeug\test.py:1243: in get
+    return self.open(*args, **kw)
+venv\Lib\site-packages\flask\testing.py:232: in open
+    response = super().open(
+venv\Lib\site-packages\werkzeug\test.py:1197: in open
+    response = self.run_wsgi_app(request.environ, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1069: in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1345: in run_wsgi_app
+    app_rv = app(environ, start_response)
+venv\Lib\site-packages\flask\app.py:2213: in __call__
+    return self.wsgi_app(environ, start_response)
+venv\Lib\site-packages\flask\app.py:2193: in wsgi_app
+    response = self.handle_exception(e)
+venv\Lib\site-packages\flask\app.py:2190: in wsgi_app
+    response = self.full_dispatch_request()
+venv\Lib\site-packages\flask\app.py:1486: in full_dispatch_request
+    rv = self.handle_user_exception(e)
+venv\Lib\site-packages\flask\app.py:1484: in full_dispatch_request
+    rv = self.dispatch_request()
+venv\Lib\site-packages\flask\app.py:1469: in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+venv\Lib\site-packages\flask_login\utils.py:290: in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+app\analytics\routes.py:76: in page_stats
+    return render_template('analytics/page_stats.html', title=f'Analytics for {page.title}',
+venv\Lib\site-packages\flask\templating.py:150: in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+venv\Lib\site-packages\jinja2\environment.py:1087: in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+venv\Lib\site-packages\jinja2\environment.py:1016: in get_template
+    return self._load_template(name, globals)
+venv\Lib\site-packages\jinja2\environment.py:975: in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+venv\Lib\site-packages\jinja2\loaders.py:126: in load
+    source, filename, uptodate = self.get_source(environment, name)
+venv\Lib\site-packages\flask\templating.py:64: in get_source
+    return self._get_source_fast(environment, template)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <flask.templating.DispatchingJinjaLoader object at 0x000001FE1B055730>
+environment = <flask.templating.Environment object at 0x000001FE19B7C920>
+template = 'analytics/page_stats.html'
+
+    def _get_source_fast(
+        self, environment: Environment, template: str
+    ) -> tuple[str, str | None, t.Callable | None]:
+        for _srcobj, loader in self._iter_loaders(template):
+            try:
+                return loader.get_source(environment, template)
+            except TemplateNotFound:
+                continue
+>       raise TemplateNotFound(template)
+E       jinja2.exceptions.TemplateNotFound: analytics/page_stats.html
+
+venv\Lib\site-packages\flask\templating.py:98: TemplateNotFound
+____________________________ test_test_stats_page _____________________________
+
+client = <FlaskClient <Flask 'app'>>
+auth = <conftest.auth.<locals>.AuthActions object at 0x000001FE1B093E30>
+
+    def test_test_stats_page(client, auth):
+        """Test test stats page."""
+        auth.login()
+>       response = client.get('/analytics/test/1')
+
+tests\test_analytics.py:248: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+venv\Lib\site-packages\werkzeug\test.py:1243: in get
+    return self.open(*args, **kw)
+venv\Lib\site-packages\flask\testing.py:232: in open
+    response = super().open(
+venv\Lib\site-packages\werkzeug\test.py:1197: in open
+    response = self.run_wsgi_app(request.environ, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1069: in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1345: in run_wsgi_app
+    app_rv = app(environ, start_response)
+venv\Lib\site-packages\flask\app.py:2213: in __call__
+    return self.wsgi_app(environ, start_response)
+venv\Lib\site-packages\flask\app.py:2193: in wsgi_app
+    response = self.handle_exception(e)
+venv\Lib\site-packages\flask\app.py:2190: in wsgi_app
+    response = self.full_dispatch_request()
+venv\Lib\site-packages\flask\app.py:1486: in full_dispatch_request
+    rv = self.handle_user_exception(e)
+venv\Lib\site-packages\flask\app.py:1484: in full_dispatch_request
+    rv = self.dispatch_request()
+venv\Lib\site-packages\flask\app.py:1469: in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+venv\Lib\site-packages\flask_login\utils.py:290: in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+app\analytics\routes.py:91: in test_stats
+    return render_template('analytics/test_stats.html', title=f'Results for {test_results["test"].name}',
+venv\Lib\site-packages\flask\templating.py:150: in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+venv\Lib\site-packages\jinja2\environment.py:1087: in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+venv\Lib\site-packages\jinja2\environment.py:1016: in get_template
+    return self._load_template(name, globals)
+venv\Lib\site-packages\jinja2\environment.py:975: in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+venv\Lib\site-packages\jinja2\loaders.py:126: in load
+    source, filename, uptodate = self.get_source(environment, name)
+venv\Lib\site-packages\flask\templating.py:64: in get_source
+    return self._get_source_fast(environment, template)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <flask.templating.DispatchingJinjaLoader object at 0x000001FE1B010B90>
+environment = <flask.templating.Environment object at 0x000001FE1B010AA0>
+template = 'analytics/test_stats.html'
+
+    def _get_source_fast(
+        self, environment: Environment, template: str
+    ) -> tuple[str, str | None, t.Callable | None]:
+        for _srcobj, loader in self._iter_loaders(template):
+            try:
+                return loader.get_source(environment, template)
+            except TemplateNotFound:
+                continue
+>       raise TemplateNotFound(template)
+E       jinja2.exceptions.TemplateNotFound: analytics/test_stats.html
+
+venv\Lib\site-packages\flask\templating.py:98: TemplateNotFound
+____________________________ test_api_record_view _____________________________
+
+client = <FlaskClient <Flask 'app'>>
+
+    def test_api_record_view(client):
+        """Test API endpoint to record a page view."""
+        response = client.post(
+            '/api/page_view',
+            json={'page_id': 1}
+        )
+    
+>       assert response.status_code == 200
+E       assert 404 == 200
+E        +  where 404 = <WrapperTestResponse streamed [404 NOT FOUND]>.status_code
+
+tests\test_analytics.py:261: AssertionError
+____________________________ test_export_test_data ____________________________
+
+client = <FlaskClient <Flask 'app'>>
+auth = <conftest.auth.<locals>.AuthActions object at 0x000001FE19C1AF00>
+
+    def test_export_test_data(client, auth):
+        """Test exporting test data as CSV."""
+        auth.login()
+        response = client.get('/analytics/export/test/1')
+    
+        assert response.status_code == 200
+>       assert response.headers.get('Content-Type') == 'text/csv'
+E       AssertionError: assert 'text/csv; charset=utf-8' == 'text/csv'
+E         - text/csv
+E         + text/csv; charset=utf-8
+
+tests\test_analytics.py:272: AssertionError
+_____________________________ test_access_control _____________________________
+
+client = <FlaskClient <Flask 'app'>>
+auth = <conftest.auth.<locals>.AuthActions object at 0x000001FE1AE54890>
+
+    def test_access_control(client, auth):
+        """Test that analytics pages require authentication."""
+        # Without login
+        response = client.get('/analytics/dashboard')
+        assert response.status_code == 302  # Redirect to login
+    
+        # With login
+        auth.login()
+>       response = client.get('/analytics/dashboard')
+
+tests\test_analytics.py:291: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+venv\Lib\site-packages\werkzeug\test.py:1243: in get
+    return self.open(*args, **kw)
+venv\Lib\site-packages\flask\testing.py:232: in open
+    response = super().open(
+venv\Lib\site-packages\werkzeug\test.py:1197: in open
+    response = self.run_wsgi_app(request.environ, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1069: in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1345: in run_wsgi_app
+    app_rv = app(environ, start_response)
+venv\Lib\site-packages\flask\app.py:2213: in __call__
+    return self.wsgi_app(environ, start_response)
+venv\Lib\site-packages\flask\app.py:2193: in wsgi_app
+    response = self.handle_exception(e)
+venv\Lib\site-packages\flask\app.py:2190: in wsgi_app
+    response = self.full_dispatch_request()
+venv\Lib\site-packages\flask\app.py:1486: in full_dispatch_request
+    rv = self.handle_user_exception(e)
+venv\Lib\site-packages\flask\app.py:1484: in full_dispatch_request
+    rv = self.dispatch_request()
+venv\Lib\site-packages\flask\app.py:1469: in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+venv\Lib\site-packages\flask_login\utils.py:290: in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+app\analytics\routes.py:24: in dashboard
+    return render_template('analytics/dashboard.html', title='Analytics Dashboard',
+venv\Lib\site-packages\flask\templating.py:150: in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+venv\Lib\site-packages\jinja2\environment.py:1087: in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+venv\Lib\site-packages\jinja2\environment.py:1016: in get_template
+    return self._load_template(name, globals)
+venv\Lib\site-packages\jinja2\environment.py:975: in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+venv\Lib\site-packages\jinja2\loaders.py:126: in load
+    source, filename, uptodate = self.get_source(environment, name)
+venv\Lib\site-packages\flask\templating.py:64: in get_source
+    return self._get_source_fast(environment, template)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <flask.templating.DispatchingJinjaLoader object at 0x000001FE19C1C6B0>
+environment = <flask.templating.Environment object at 0x000001FE1AE5C920>
+template = 'analytics/dashboard.html'
+
+    def _get_source_fast(
+        self, environment: Environment, template: str
+    ) -> tuple[str, str | None, t.Callable | None]:
+        for _srcobj, loader in self._iter_loaders(template):
+            try:
+                return loader.get_source(environment, template)
+            except TemplateNotFound:
+                continue
+>       raise TemplateNotFound(template)
+E       jinja2.exceptions.TemplateNotFound: analytics/dashboard.html
+
+venv\Lib\site-packages\flask\templating.py:98: TemplateNotFound
+_____________________________ test_login_success ______________________________
+
+client = <FlaskClient <Flask 'app'>>
+auth = <conftest.auth.<locals>.AuthActions object at 0x000001FE19BA7770>
+
+    def test_login_success(client, auth):
+        """Test successful login."""
+        response = auth.login()
+>       assert response.headers.get('Location') == 'http://localhost/content/dashboard'
+E       AssertionError: assert '/content/dashboard' == 'http://local...ent/dashboard'
+E         - http://localhost/content/dashboard
+E         + /content/dashboard
+
+tests\test_auth.py:20: AssertionError
+________________________ test_login_incorrect_password ________________________
+
+client = <FlaskClient <Flask 'app'>>
+
+    def test_login_incorrect_password(client):
+        """Test login with incorrect password."""
+        response = client.post(
+            '/auth/login',
+            data={'username': 'admin', 'password': 'wrongpassword'}
+        )
+>       assert b'Invalid username or password' in response.data
+E       assert b'Invalid username or password' in b'<!doctype html>\n<html lang=en>\n<title>Redirecting...</title>\n<h1>Redirecting...</h1>\n<p>You should be redirected automatically to the target URL: <a href="/auth/login">/auth/login</a>. If not, click the link.\n'
+E        +  where b'<!doctype html>\n<html lang=en>\n<title>Redirecting...</title>\n<h1>Redirecting...</h1>\n<p>You should be redirected automatically to the target URL: <a href="/auth/login">/auth/login</a>. If not, click the link.\n' = <WrapperTestResponse 209 bytes [302 FOUND]>.data
+
+tests\test_auth.py:33: AssertionError
+_________________________ test_login_invalid_username _________________________
+
+client = <FlaskClient <Flask 'app'>>
+
+    def test_login_invalid_username(client):
+        """Test login with non-existent username."""
+        response = client.post(
+            '/auth/login',
+            data={'username': 'nonexistent', 'password': 'password'}
+        )
+>       assert b'Invalid username or password' in response.data
+E       assert b'Invalid username or password' in b'<!doctype html>\n<html lang=en>\n<title>Redirecting...</title>\n<h1>Redirecting...</h1>\n<p>You should be redirected automatically to the target URL: <a href="/auth/login">/auth/login</a>. If not, click the link.\n'
+E        +  where b'<!doctype html>\n<html lang=en>\n<title>Redirecting...</title>\n<h1>Redirecting...</h1>\n<p>You should be redirected automatically to the target URL: <a href="/auth/login">/auth/login</a>. If not, click the link.\n' = <WrapperTestResponse 209 bytes [302 FOUND]>.data
+
+tests\test_auth.py:42: AssertionError
+_____________________________ test_register_user ______________________________
+
+client = <FlaskClient <Flask 'app'>>
+auth = <conftest.auth.<locals>.AuthActions object at 0x000001FE1AEB5730>
+
+    def test_register_user(client, auth):
+        """Test user registration (requires admin)."""
+        auth.login()
+        response = client.post(
+            '/auth/register',
+            data={
+                'username': 'newuser',
+                'email': 'newuser@example.com',
+                'password': 'newpassword',
+                'password2': 'newpassword',
+                'role': 'marketer'
+            }
+        )
+>       assert response.headers.get('Location') == 'http://localhost/auth/users'
+E       AssertionError: assert '/auth/users' == 'http://localhost/auth/users'
+E         - http://localhost/auth/users
+E         + /auth/users
+
+tests\test_auth.py:87: AssertionError
+____________________________ test_change_password _____________________________
+
+client = <FlaskClient <Flask 'app'>>
+auth = <conftest.auth.<locals>.AuthActions object at 0x000001FE1AD737A0>
+
+    def test_change_password(client, auth):
+        """Test password change functionality."""
+        auth.login()
+    
+        # Change password
+        response = client.post(
+            '/auth/change_password',
+            data={
+                'current_password': 'password',
+                'new_password': 'newpassword',
+                'confirm_password': 'newpassword'
+            },
+            follow_redirects=True
+        )
+        assert b'Your password has been updated' in response.data
+    
+        # Logout and login with new password
+        auth.logout()
+        response = client.post(
+            '/auth/login',
+            data={'username': 'admin', 'password': 'newpassword'}
+        )
+>       assert response.headers.get('Location') == 'http://localhost/content/dashboard'
+E       AssertionError: assert '/content/dashboard' == 'http://local...ent/dashboard'
+E         - http://localhost/content/dashboard
+E         + /content/dashboard
+
+tests\test_auth.py:129: AssertionError
+_____________________ test_change_password_wrong_current ______________________
+
+client = <FlaskClient <Flask 'app'>>
+auth = <conftest.auth.<locals>.AuthActions object at 0x000001FE1B19FA10>
+
+    def test_change_password_wrong_current(client, auth):
+        """Test password change with incorrect current password."""
+        auth.login()
+    
+>       response = client.post(
+            '/auth/change_password',
+            data={
+                'current_password': 'wrongpassword',
+                'new_password': 'newpassword',
+                'confirm_password': 'newpassword'
+            },
+            follow_redirects=True
+        )
+
+tests\test_auth.py:136: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+venv\Lib\site-packages\werkzeug\test.py:1248: in post
+    return self.open(*args, **kw)
+venv\Lib\site-packages\flask\testing.py:232: in open
+    response = super().open(
+venv\Lib\site-packages\werkzeug\test.py:1231: in open
+    response = self.resolve_redirect(response, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1137: in resolve_redirect
+    return self.open(builder, buffered=buffered)
+venv\Lib\site-packages\flask\testing.py:232: in open
+    response = super().open(
+venv\Lib\site-packages\werkzeug\test.py:1197: in open
+    response = self.run_wsgi_app(request.environ, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1069: in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1345: in run_wsgi_app
+    app_rv = app(environ, start_response)
+venv\Lib\site-packages\flask\app.py:2213: in __call__
+    return self.wsgi_app(environ, start_response)
+venv\Lib\site-packages\flask\app.py:2193: in wsgi_app
+    response = self.handle_exception(e)
+venv\Lib\site-packages\flask\app.py:2190: in wsgi_app
+    response = self.full_dispatch_request()
+venv\Lib\site-packages\flask\app.py:1486: in full_dispatch_request
+    rv = self.handle_user_exception(e)
+venv\Lib\site-packages\flask\app.py:1484: in full_dispatch_request
+    rv = self.dispatch_request()
+venv\Lib\site-packages\flask\app.py:1469: in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+venv\Lib\site-packages\flask_login\utils.py:290: in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+app\auth\routes.py:109: in change_password
+    return render_template('auth/change_password.html', form=form)
+venv\Lib\site-packages\flask\templating.py:150: in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+venv\Lib\site-packages\jinja2\environment.py:1087: in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+venv\Lib\site-packages\jinja2\environment.py:1016: in get_template
+    return self._load_template(name, globals)
+venv\Lib\site-packages\jinja2\environment.py:975: in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+venv\Lib\site-packages\jinja2\loaders.py:126: in load
+    source, filename, uptodate = self.get_source(environment, name)
+venv\Lib\site-packages\flask\templating.py:64: in get_source
+    return self._get_source_fast(environment, template)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <flask.templating.DispatchingJinjaLoader object at 0x000001FE1B17D8B0>
+environment = <flask.templating.Environment object at 0x000001FE1B17DA60>
+template = 'auth/change_password.html'
+
+    def _get_source_fast(
+        self, environment: Environment, template: str
+    ) -> tuple[str, str | None, t.Callable | None]:
+        for _srcobj, loader in self._iter_loaders(template):
+            try:
+                return loader.get_source(environment, template)
+            except TemplateNotFound:
+                continue
+>       raise TemplateNotFound(template)
+E       jinja2.exceptions.TemplateNotFound: auth/change_password.html
+
+venv\Lib\site-packages\flask\templating.py:98: TemplateNotFound
+_____________________________ test_website_detail _____________________________
+
+client = <FlaskClient <Flask 'app'>>
+auth = <conftest.auth.<locals>.AuthActions object at 0x000001FE1B8977D0>
+
+    def test_website_detail(client, auth):
+        """Test website detail page."""
+        auth.login()
+        response = client.get('/website/1')
+>       assert response.status_code == 200
+E       assert 404 == 200
+E        +  where 404 = <WrapperTestResponse streamed [404 NOT FOUND]>.status_code
+
+tests\test_content.py:28: AssertionError
+_____________________________ test_create_website _____________________________
+
+client = <FlaskClient <Flask 'app'>>
+auth = <conftest.auth.<locals>.AuthActions object at 0x000001FE1B56C2C0>
+
+    def test_create_website(client, auth):
+        """Test website creation."""
+        auth.login()
+        response = client.post(
+            '/website/new',
+            data={
+                'name': 'New Website',
+                'domain': 'new.example.com'
+            },
+            follow_redirects=True
+        )
+>       assert b'Website New Website created successfully' in response.data
+E       assert b'Website New Website created successfully' in b'<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Page Not Found</title>\n    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">\n    <link rel="stylesheet" href="/static/css/styles.css">\n    \n</head>\n<body>\n    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">\n        <div class="container">\n            <a class="navbar-brand" href="/content/dashboard">Streamlined CMS</a>\n            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">\n                <span class="navbar-toggler-icon"></span>\n            </button>\n            <div class="collapse navbar-collapse" id="navbarNav">\n                <ul class="navbar-nav mr-auto">\n                    \n                    <li class="nav-item">\n                        <a class="nav-link" href="/content/dashboard">Websites</a>\n                    </li>\n                    <li class="nav-item">\n                        <a class="nav-link" href="/splitest/tests">Split Tests</a>\n                    </li>\n          ...            <a class="dropdown-item" href="/auth/change_password">Change Password</a>\n                            <div class="dropdown-divider"></div>\n                            <a class="dropdown-item" href="/auth/logout">Logout</a>\n                        </div>\n                    </li>\n                    \n                </ul>\n            </div>\n        </div>\n    </nav>\n\n    <div class="container mt-4">\n        \n        \n        \n\n        \n<div class="text-center mt-5">\n    <h1 class="display-4">404</h1>\n    <h2>Page Not Found</h2>\n    <p class="lead">The page you are looking for does not exist.</p>\n    <p>It may have been moved or deleted.</p>\n    <a href="/content/dashboard" class="btn btn-primary mt-3">Return to Dashboard</a>\n</div>\n\n    </div>\n\n    <footer class="footer mt-5 py-3 bg-light">\n        <div class="container text-center">\n            <span class="text-muted">Streamlined CMS &copy; 2025</span>\n        </div>\n    </footer>\n\n    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>\n    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>\n    \n</body>\n</html>'
+E        +  where b'<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Page Not Found</title>\n    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">\n    <link rel="stylesheet" href="/static/css/styles.css">\n    \n</head>\n<body>\n    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">\n        <div class="container">\n            <a class="navbar-brand" href="/content/dashboard">Streamlined CMS</a>\n            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">\n                <span class="navbar-toggler-icon"></span>\n            </button>\n            <div class="collapse navbar-collapse" id="navbarNav">\n                <ul class="navbar-nav mr-auto">\n                    \n                    <li class="nav-item">\n                        <a class="nav-link" href="/content/dashboard">Websites</a>\n                    </li>\n                    <li class="nav-item">\n                        <a class="nav-link" href="/splitest/tests">Split Tests</a>\n                    </li>\n          ...            <a class="dropdown-item" href="/auth/change_password">Change Password</a>\n                            <div class="dropdown-divider"></div>\n                            <a class="dropdown-item" href="/auth/logout">Logout</a>\n                        </div>\n                    </li>\n                    \n                </ul>\n            </div>\n        </div>\n    </nav>\n\n    <div class="container mt-4">\n        \n        \n        \n\n        \n<div class="text-center mt-5">\n    <h1 class="display-4">404</h1>\n    <h2>Page Not Found</h2>\n    <p class="lead">The page you are looking for does not exist.</p>\n    <p>It may have been moved or deleted.</p>\n    <a href="/content/dashboard" class="btn btn-primary mt-3">Return to Dashboard</a>\n</div>\n\n    </div>\n\n    <footer class="footer mt-5 py-3 bg-light">\n        <div class="container text-center">\n            <span class="text-muted">Streamlined CMS &copy; 2025</span>\n        </div>\n    </footer>\n\n    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>\n    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>\n    \n</body>\n</html>' = <WrapperTestResponse 3089 bytes [404 NOT FOUND]>.data
+
+tests\test_content.py:46: AssertionError
+______________________________ test_create_page _______________________________
+
+client = <FlaskClient <Flask 'app'>>
+auth = <conftest.auth.<locals>.AuthActions object at 0x000001FE1B633F80>
+
+    def test_create_page(client, auth):
+        """Test page creation."""
+        auth.login()
+        response = client.post(
+            '/page/new/1',
+            data={
+                'title': 'New Page',
+                'path': '/new-page.html'
+            },
+            follow_redirects=True
+        )
+>       assert b'Page New Page created successfully' in response.data
+E       assert b'Page New Page created successfully' in b'<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Page Not Found</title>\n    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">\n    <link rel="stylesheet" href="/static/css/styles.css">\n    \n</head>\n<body>\n    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">\n        <div class="container">\n            <a class="navbar-brand" href="/content/dashboard">Streamlined CMS</a>\n            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">\n                <span class="navbar-toggler-icon"></span>\n            </button>\n            <div class="collapse navbar-collapse" id="navbarNav">\n                <ul class="navbar-nav mr-auto">\n                    \n                    <li class="nav-item">\n                        <a class="nav-link" href="/content/dashboard">Websites</a>\n                    </li>\n                    <li class="nav-item">\n                        <a class="nav-link" href="/splitest/tests">Split Tests</a>\n                    </li>\n          ...            <a class="dropdown-item" href="/auth/change_password">Change Password</a>\n                            <div class="dropdown-divider"></div>\n                            <a class="dropdown-item" href="/auth/logout">Logout</a>\n                        </div>\n                    </li>\n                    \n                </ul>\n            </div>\n        </div>\n    </nav>\n\n    <div class="container mt-4">\n        \n        \n        \n\n        \n<div class="text-center mt-5">\n    <h1 class="display-4">404</h1>\n    <h2>Page Not Found</h2>\n    <p class="lead">The page you are looking for does not exist.</p>\n    <p>It may have been moved or deleted.</p>\n    <a href="/content/dashboard" class="btn btn-primary mt-3">Return to Dashboard</a>\n</div>\n\n    </div>\n\n    <footer class="footer mt-5 py-3 bg-light">\n        <div class="container text-center">\n            <span class="text-muted">Streamlined CMS &copy; 2025</span>\n        </div>\n    </footer>\n\n    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>\n    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>\n    \n</body>\n</html>'
+E        +  where b'<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Page Not Found</title>\n    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">\n    <link rel="stylesheet" href="/static/css/styles.css">\n    \n</head>\n<body>\n    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">\n        <div class="container">\n            <a class="navbar-brand" href="/content/dashboard">Streamlined CMS</a>\n            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">\n                <span class="navbar-toggler-icon"></span>\n            </button>\n            <div class="collapse navbar-collapse" id="navbarNav">\n                <ul class="navbar-nav mr-auto">\n                    \n                    <li class="nav-item">\n                        <a class="nav-link" href="/content/dashboard">Websites</a>\n                    </li>\n                    <li class="nav-item">\n                        <a class="nav-link" href="/splitest/tests">Split Tests</a>\n                    </li>\n          ...            <a class="dropdown-item" href="/auth/change_password">Change Password</a>\n                            <div class="dropdown-divider"></div>\n                            <a class="dropdown-item" href="/auth/logout">Logout</a>\n                        </div>\n                    </li>\n                    \n                </ul>\n            </div>\n        </div>\n    </nav>\n\n    <div class="container mt-4">\n        \n        \n        \n\n        \n<div class="text-center mt-5">\n    <h1 class="display-4">404</h1>\n    <h2>Page Not Found</h2>\n    <p class="lead">The page you are looking for does not exist.</p>\n    <p>It may have been moved or deleted.</p>\n    <a href="/content/dashboard" class="btn btn-primary mt-3">Return to Dashboard</a>\n</div>\n\n    </div>\n\n    <footer class="footer mt-5 py-3 bg-light">\n        <div class="container text-center">\n            <span class="text-muted">Streamlined CMS &copy; 2025</span>\n        </div>\n    </footer>\n\n    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>\n    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>\n    \n</body>\n</html>' = <WrapperTestResponse 3089 bytes [404 NOT FOUND]>.data
+
+tests\test_content.py:65: AssertionError
+__________________________ test_api_get_page_content __________________________
+
+client = <FlaskClient <Flask 'app'>>
+auth = <conftest.auth.<locals>.AuthActions object at 0x000001FE1B5E0AD0>
+
+    def test_api_get_page_content(client, auth):
+        """Test API endpoint to get page content."""
+        auth.login()
+        response = client.get('/api/page/1/content')
+>       assert response.status_code == 200
+E       assert 404 == 200
+E        +  where 404 = <WrapperTestResponse streamed [404 NOT FOUND]>.status_code
+
+tests\test_content.py:78: AssertionError
+_________________________ test_api_save_page_content __________________________
+
+client = <FlaskClient <Flask 'app'>>
+auth = <conftest.auth.<locals>.AuthActions object at 0x000001FE1B7F3620>
+
+    def test_api_save_page_content(client, auth):
+        """Test API endpoint to save page content."""
+        auth.login()
+        content_changes = {
+            '#title': 'Updated Title',
+            '#content': 'Updated content text.'
+        }
+    
+        response = client.post(
+            '/api/page/1/content',
+            json={'content': content_changes}
+        )
+>       assert response.status_code == 200
+E       assert 404 == 200
+E        +  where 404 = <WrapperTestResponse streamed [404 NOT FOUND]>.status_code
+
+tests\test_content.py:98: AssertionError
+______________________________ test_page_detail _______________________________
+
+client = <FlaskClient <Flask 'app'>>
+auth = <conftest.auth.<locals>.AuthActions object at 0x000001FE1B537FE0>
+
+    def test_page_detail(client, auth):
+        """Test page detail view."""
+        auth.login()
+        response = client.get('/page/1')
+    
+>       assert response.status_code == 200
+E       assert 404 == 200
+E        +  where 404 = <WrapperTestResponse streamed [404 NOT FOUND]>.status_code
+
+tests\test_content.py:179: AssertionError
+_______________________________ test_edit_page ________________________________
+
+client = <FlaskClient <Flask 'app'>>
+auth = <conftest.auth.<locals>.AuthActions object at 0x000001FE1B13FE60>
+
+    def test_edit_page(client, auth):
+        """Test edit page view."""
+        auth.login()
+        response = client.get('/page/1/edit')
+    
+>       assert response.status_code == 200
+E       assert 404 == 200
+E        +  where 404 = <WrapperTestResponse streamed [404 NOT FOUND]>.status_code
+
+tests\test_content.py:189: AssertionError
+_______________________ test_content_version_activation _______________________
+
+client = <FlaskClient <Flask 'app'>>
+auth = <conftest.auth.<locals>.AuthActions object at 0x000001FE1B2B1B50>
+
+    def test_content_version_activation(client, auth):
+        """Test activation of content versions."""
+        auth.login()
+    
+        # Create a new content version
+        with client.application.app_context():
+            page = Page.query.get(1)
+            user = auth.login()
+    
+            # Create inactive version
+            inactive_version = ContentVersion(
+                page_id=page.id,
+                content_hash='xyz789',
+                content_json='{"#title": "Another Test Title", "#content": "Another test content."}',
+                version_type='content',
+                created_by=1,  # Admin user
+                is_active=False
+            )
+    
+            from app import db
+            db.session.add(inactive_version)
+            db.session.commit()
+    
+            version_id = inactive_version.id
+    
+        # Activate the version
+        response = client.post(
+            f'/page/1/version/{version_id}/activate',
+            follow_redirects=True
+        )
+    
+>       assert b'Content version activated successfully' in response.data
+E       assert b'Content version activated successfully' in b'<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Page Not Found</title>\n    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">\n    <link rel="stylesheet" href="/static/css/styles.css">\n    \n</head>\n<body>\n    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">\n        <div class="container">\n            <a class="navbar-brand" href="/content/dashboard">Streamlined CMS</a>\n            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">\n                <span class="navbar-toggler-icon"></span>\n            </button>\n            <div class="collapse navbar-collapse" id="navbarNav">\n                <ul class="navbar-nav mr-auto">\n                    \n                    <li class="nav-item">\n                        <a class="nav-link" href="/content/dashboard">Websites</a>\n                    </li>\n                    <li class="nav-item">\n                        <a class="nav-link" href="/splitest/tests">Split Tests</a>\n                    </li>\n          ...            <a class="dropdown-item" href="/auth/change_password">Change Password</a>\n                            <div class="dropdown-divider"></div>\n                            <a class="dropdown-item" href="/auth/logout">Logout</a>\n                        </div>\n                    </li>\n                    \n                </ul>\n            </div>\n        </div>\n    </nav>\n\n    <div class="container mt-4">\n        \n        \n        \n\n        \n<div class="text-center mt-5">\n    <h1 class="display-4">404</h1>\n    <h2>Page Not Found</h2>\n    <p class="lead">The page you are looking for does not exist.</p>\n    <p>It may have been moved or deleted.</p>\n    <a href="/content/dashboard" class="btn btn-primary mt-3">Return to Dashboard</a>\n</div>\n\n    </div>\n\n    <footer class="footer mt-5 py-3 bg-light">\n        <div class="container text-center">\n            <span class="text-muted">Streamlined CMS &copy; 2025</span>\n        </div>\n    </footer>\n\n    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>\n    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>\n    \n</body>\n</html>'
+E        +  where b'<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Page Not Found</title>\n    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">\n    <link rel="stylesheet" href="/static/css/styles.css">\n    \n</head>\n<body>\n    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">\n        <div class="container">\n            <a class="navbar-brand" href="/content/dashboard">Streamlined CMS</a>\n            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">\n                <span class="navbar-toggler-icon"></span>\n            </button>\n            <div class="collapse navbar-collapse" id="navbarNav">\n                <ul class="navbar-nav mr-auto">\n                    \n                    <li class="nav-item">\n                        <a class="nav-link" href="/content/dashboard">Websites</a>\n                    </li>\n                    <li class="nav-item">\n                        <a class="nav-link" href="/splitest/tests">Split Tests</a>\n                    </li>\n          ...            <a class="dropdown-item" href="/auth/change_password">Change Password</a>\n                            <div class="dropdown-divider"></div>\n                            <a class="dropdown-item" href="/auth/logout">Logout</a>\n                        </div>\n                    </li>\n                    \n                </ul>\n            </div>\n        </div>\n    </nav>\n\n    <div class="container mt-4">\n        \n        \n        \n\n        \n<div class="text-center mt-5">\n    <h1 class="display-4">404</h1>\n    <h2>Page Not Found</h2>\n    <p class="lead">The page you are looking for does not exist.</p>\n    <p>It may have been moved or deleted.</p>\n    <a href="/content/dashboard" class="btn btn-primary mt-3">Return to Dashboard</a>\n</div>\n\n    </div>\n\n    <footer class="footer mt-5 py-3 bg-light">\n        <div class="container text-center">\n            <span class="text-muted">Streamlined CMS &copy; 2025</span>\n        </div>\n    </footer>\n\n    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>\n    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>\n    \n</body>\n</html>' = <WrapperTestResponse 3089 bytes [404 NOT FOUND]>.data
+
+tests\test_content.py:224: AssertionError
+____________________________ test_end_to_end_flow _____________________________
+
+client = <FlaskClient <Flask 'app'>>
+auth = <conftest.auth.<locals>.AuthActions object at 0x000001FE1AE5F980>
+
+    def test_end_to_end_flow(client, auth):
+        """Test the complete user flow from login to content editing to split testing."""
+        # 1. Admin logs in
+        auth.login()
+    
+        # 2. Create a new website
+        response = client.post(
+            '/website/new',
+            data={
+                'name': 'Integration Test Site',
+                'domain': 'integration.example.com'
+            },
+            follow_redirects=True
+        )
+>       assert b'Website Integration Test Site created successfully' in response.data
+E       assert b'Website Integration Test Site created successfully' in b'<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Page Not Found</title>\n    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">\n    <link rel="stylesheet" href="/static/css/styles.css">\n    \n</head>\n<body>\n    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">\n        <div class="container">\n            <a class="navbar-brand" href="/content/dashboard">Streamlined CMS</a>\n            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">\n                <span class="navbar-toggler-icon"></span>\n            </button>\n            <div class="collapse navbar-collapse" id="navbarNav">\n                <ul class="navbar-nav mr-auto">\n                    \n                    <li class="nav-item">\n                        <a class="nav-link" href="/content/dashboard">Websites</a>\n                    </li>\n                    <li class="nav-item">\n                        <a class="nav-link" href="/splitest/tests">Split Tests</a>\n                    </li>\n          ...            <a class="dropdown-item" href="/auth/change_password">Change Password</a>\n                            <div class="dropdown-divider"></div>\n                            <a class="dropdown-item" href="/auth/logout">Logout</a>\n                        </div>\n                    </li>\n                    \n                </ul>\n            </div>\n        </div>\n    </nav>\n\n    <div class="container mt-4">\n        \n        \n        \n\n        \n<div class="text-center mt-5">\n    <h1 class="display-4">404</h1>\n    <h2>Page Not Found</h2>\n    <p class="lead">The page you are looking for does not exist.</p>\n    <p>It may have been moved or deleted.</p>\n    <a href="/content/dashboard" class="btn btn-primary mt-3">Return to Dashboard</a>\n</div>\n\n    </div>\n\n    <footer class="footer mt-5 py-3 bg-light">\n        <div class="container text-center">\n            <span class="text-muted">Streamlined CMS &copy; 2025</span>\n        </div>\n    </footer>\n\n    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>\n    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>\n    \n</body>\n</html>'
+E        +  where b'<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Page Not Found</title>\n    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">\n    <link rel="stylesheet" href="/static/css/styles.css">\n    \n</head>\n<body>\n    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">\n        <div class="container">\n            <a class="navbar-brand" href="/content/dashboard">Streamlined CMS</a>\n            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">\n                <span class="navbar-toggler-icon"></span>\n            </button>\n            <div class="collapse navbar-collapse" id="navbarNav">\n                <ul class="navbar-nav mr-auto">\n                    \n                    <li class="nav-item">\n                        <a class="nav-link" href="/content/dashboard">Websites</a>\n                    </li>\n                    <li class="nav-item">\n                        <a class="nav-link" href="/splitest/tests">Split Tests</a>\n                    </li>\n          ...            <a class="dropdown-item" href="/auth/change_password">Change Password</a>\n                            <div class="dropdown-divider"></div>\n                            <a class="dropdown-item" href="/auth/logout">Logout</a>\n                        </div>\n                    </li>\n                    \n                </ul>\n            </div>\n        </div>\n    </nav>\n\n    <div class="container mt-4">\n        \n        \n        \n\n        \n<div class="text-center mt-5">\n    <h1 class="display-4">404</h1>\n    <h2>Page Not Found</h2>\n    <p class="lead">The page you are looking for does not exist.</p>\n    <p>It may have been moved or deleted.</p>\n    <a href="/content/dashboard" class="btn btn-primary mt-3">Return to Dashboard</a>\n</div>\n\n    </div>\n\n    <footer class="footer mt-5 py-3 bg-light">\n        <div class="container text-center">\n            <span class="text-muted">Streamlined CMS &copy; 2025</span>\n        </div>\n    </footer>\n\n    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>\n    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>\n    \n</body>\n</html>' = <WrapperTestResponse 3089 bytes [404 NOT FOUND]>.data
+
+tests\test_integration.py:29: AssertionError
+__________________________ test_different_user_roles __________________________
+
+client = <FlaskClient <Flask 'app'>>
+auth = <conftest.auth.<locals>.AuthActions object at 0x000001FE1AE8CDD0>
+
+    def test_different_user_roles(client, auth):
+        """Test that different user roles have appropriate permissions."""
+        # 1. Admin can access everything
+        auth.login(username='admin', password='password')
+    
+        response = client.get('/content/dashboard')
+        assert response.status_code == 200
+    
+>       response = client.get('/splitest/tests')
+
+tests\test_integration.py:255: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+venv\Lib\site-packages\werkzeug\test.py:1243: in get
+    return self.open(*args, **kw)
+venv\Lib\site-packages\flask\testing.py:232: in open
+    response = super().open(
+venv\Lib\site-packages\werkzeug\test.py:1197: in open
+    response = self.run_wsgi_app(request.environ, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1069: in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1345: in run_wsgi_app
+    app_rv = app(environ, start_response)
+venv\Lib\site-packages\flask\app.py:2213: in __call__
+    return self.wsgi_app(environ, start_response)
+venv\Lib\site-packages\flask\app.py:2193: in wsgi_app
+    response = self.handle_exception(e)
+venv\Lib\site-packages\flask\app.py:2190: in wsgi_app
+    response = self.full_dispatch_request()
+venv\Lib\site-packages\flask\app.py:1486: in full_dispatch_request
+    rv = self.handle_user_exception(e)
+venv\Lib\site-packages\flask\app.py:1484: in full_dispatch_request
+    rv = self.dispatch_request()
+venv\Lib\site-packages\flask\app.py:1469: in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+venv\Lib\site-packages\flask_login\utils.py:290: in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+app\splitest\routes.py:19: in test_list
+    return render_template('splitest/test_list.html', title='Split Tests', tests=tests)
+venv\Lib\site-packages\flask\templating.py:150: in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+venv\Lib\site-packages\jinja2\environment.py:1087: in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+venv\Lib\site-packages\jinja2\environment.py:1016: in get_template
+    return self._load_template(name, globals)
+venv\Lib\site-packages\jinja2\environment.py:975: in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+venv\Lib\site-packages\jinja2\loaders.py:126: in load
+    source, filename, uptodate = self.get_source(environment, name)
+venv\Lib\site-packages\flask\templating.py:64: in get_source
+    return self._get_source_fast(environment, template)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <flask.templating.DispatchingJinjaLoader object at 0x000001FE1AE5EAE0>
+environment = <flask.templating.Environment object at 0x000001FE1AE5E840>
+template = 'splitest/test_list.html'
+
+    def _get_source_fast(
+        self, environment: Environment, template: str
+    ) -> tuple[str, str | None, t.Callable | None]:
+        for _srcobj, loader in self._iter_loaders(template):
+            try:
+                return loader.get_source(environment, template)
+            except TemplateNotFound:
+                continue
+>       raise TemplateNotFound(template)
+E       jinja2.exceptions.TemplateNotFound: splitest/test_list.html
+
+venv\Lib\site-packages\flask\templating.py:98: TemplateNotFound
+_______________________________ test_test_list ________________________________
+
+client = <FlaskClient <Flask 'app'>>
+auth = <conftest.auth.<locals>.AuthActions object at 0x000001FE1AFA6C90>
+
+    def test_test_list(client, auth):
+        """Test split test list page."""
+        auth.login()
+>       response = client.get('/splitest/tests')
+
+tests\test_splitest.py:16: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+venv\Lib\site-packages\werkzeug\test.py:1243: in get
+    return self.open(*args, **kw)
+venv\Lib\site-packages\flask\testing.py:232: in open
+    response = super().open(
+venv\Lib\site-packages\werkzeug\test.py:1197: in open
+    response = self.run_wsgi_app(request.environ, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1069: in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1345: in run_wsgi_app
+    app_rv = app(environ, start_response)
+venv\Lib\site-packages\flask\app.py:2213: in __call__
+    return self.wsgi_app(environ, start_response)
+venv\Lib\site-packages\flask\app.py:2193: in wsgi_app
+    response = self.handle_exception(e)
+venv\Lib\site-packages\flask\app.py:2190: in wsgi_app
+    response = self.full_dispatch_request()
+venv\Lib\site-packages\flask\app.py:1486: in full_dispatch_request
+    rv = self.handle_user_exception(e)
+venv\Lib\site-packages\flask\app.py:1484: in full_dispatch_request
+    rv = self.dispatch_request()
+venv\Lib\site-packages\flask\app.py:1469: in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+venv\Lib\site-packages\flask_login\utils.py:290: in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+app\splitest\routes.py:19: in test_list
+    return render_template('splitest/test_list.html', title='Split Tests', tests=tests)
+venv\Lib\site-packages\flask\templating.py:150: in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+venv\Lib\site-packages\jinja2\environment.py:1087: in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+venv\Lib\site-packages\jinja2\environment.py:1016: in get_template
+    return self._load_template(name, globals)
+venv\Lib\site-packages\jinja2\environment.py:975: in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+venv\Lib\site-packages\jinja2\loaders.py:126: in load
+    source, filename, uptodate = self.get_source(environment, name)
+venv\Lib\site-packages\flask\templating.py:64: in get_source
+    return self._get_source_fast(environment, template)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <flask.templating.DispatchingJinjaLoader object at 0x000001FE1AE621B0>
+environment = <flask.templating.Environment object at 0x000001FE1AE618B0>
+template = 'splitest/test_list.html'
+
+    def _get_source_fast(
+        self, environment: Environment, template: str
+    ) -> tuple[str, str | None, t.Callable | None]:
+        for _srcobj, loader in self._iter_loaders(template):
+            try:
+                return loader.get_source(environment, template)
+            except TemplateNotFound:
+                continue
+>       raise TemplateNotFound(template)
+E       jinja2.exceptions.TemplateNotFound: splitest/test_list.html
+
+venv\Lib\site-packages\flask\templating.py:98: TemplateNotFound
+______________________________ test_test_detail _______________________________
+
+client = <FlaskClient <Flask 'app'>>
+auth = <conftest.auth.<locals>.AuthActions object at 0x000001FE19B18B30>
+
+    def test_test_detail(client, auth):
+        """Test split test detail page."""
+        auth.login()
+>       response = client.get('/splitest/test/1')
+
+tests\test_splitest.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+venv\Lib\site-packages\werkzeug\test.py:1243: in get
+    return self.open(*args, **kw)
+venv\Lib\site-packages\flask\testing.py:232: in open
+    response = super().open(
+venv\Lib\site-packages\werkzeug\test.py:1197: in open
+    response = self.run_wsgi_app(request.environ, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1069: in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1345: in run_wsgi_app
+    app_rv = app(environ, start_response)
+venv\Lib\site-packages\flask\app.py:2213: in __call__
+    return self.wsgi_app(environ, start_response)
+venv\Lib\site-packages\flask\app.py:2193: in wsgi_app
+    response = self.handle_exception(e)
+venv\Lib\site-packages\flask\app.py:2190: in wsgi_app
+    response = self.full_dispatch_request()
+venv\Lib\site-packages\flask\app.py:1486: in full_dispatch_request
+    rv = self.handle_user_exception(e)
+venv\Lib\site-packages\flask\app.py:1484: in full_dispatch_request
+    rv = self.dispatch_request()
+venv\Lib\site-packages\flask\app.py:1469: in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+venv\Lib\site-packages\flask_login\utils.py:290: in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+app\splitest\routes.py:83: in test_detail
+    return render_template('splitest/test_detail.html', title=test.name, test=test,
+venv\Lib\site-packages\flask\templating.py:150: in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+venv\Lib\site-packages\jinja2\environment.py:1087: in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+venv\Lib\site-packages\jinja2\environment.py:1016: in get_template
+    return self._load_template(name, globals)
+venv\Lib\site-packages\jinja2\environment.py:975: in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+venv\Lib\site-packages\jinja2\loaders.py:126: in load
+    source, filename, uptodate = self.get_source(environment, name)
+venv\Lib\site-packages\flask\templating.py:64: in get_source
+    return self._get_source_fast(environment, template)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <flask.templating.DispatchingJinjaLoader object at 0x000001FE1B002DE0>
+environment = <flask.templating.Environment object at 0x000001FE1B0004D0>
+template = 'splitest/test_detail.html'
+
+    def _get_source_fast(
+        self, environment: Environment, template: str
+    ) -> tuple[str, str | None, t.Callable | None]:
+        for _srcobj, loader in self._iter_loaders(template):
+            try:
+                return loader.get_source(environment, template)
+            except TemplateNotFound:
+                continue
+>       raise TemplateNotFound(template)
+E       jinja2.exceptions.TemplateNotFound: splitest/test_detail.html
+
+venv\Lib\site-packages\flask\templating.py:98: TemplateNotFound
+______________________________ test_create_test _______________________________
+
+client = <FlaskClient <Flask 'app'>>
+auth = <conftest.auth.<locals>.AuthActions object at 0x000001FE19645C10>
+
+    def test_create_test(client, auth):
+        """Test creation of a new split test."""
+        auth.login()
+    
+        # First, create the test
+>       response = client.post(
+            '/splitest/test/new/2',  # Create test for About page
+            data={
+                'name': 'About Page Test',
+                'test_type': 'content',
+                'goal_page_id': '3'  # Contact page is goal
+            },
+            follow_redirects=True
+        )
+
+tests\test_splitest.py:39: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+venv\Lib\site-packages\werkzeug\test.py:1248: in post
+    return self.open(*args, **kw)
+venv\Lib\site-packages\flask\testing.py:232: in open
+    response = super().open(
+venv\Lib\site-packages\werkzeug\test.py:1197: in open
+    response = self.run_wsgi_app(request.environ, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1069: in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1345: in run_wsgi_app
+    app_rv = app(environ, start_response)
+venv\Lib\site-packages\flask\app.py:2213: in __call__
+    return self.wsgi_app(environ, start_response)
+venv\Lib\site-packages\flask\app.py:2193: in wsgi_app
+    response = self.handle_exception(e)
+venv\Lib\site-packages\flask\app.py:2190: in wsgi_app
+    response = self.full_dispatch_request()
+venv\Lib\site-packages\flask\app.py:1486: in full_dispatch_request
+    rv = self.handle_user_exception(e)
+venv\Lib\site-packages\flask\app.py:1484: in full_dispatch_request
+    rv = self.dispatch_request()
+venv\Lib\site-packages\flask\app.py:1469: in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+venv\Lib\site-packages\flask_login\utils.py:290: in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+app\auth\routes.py:31: in decorated_function
+    return f(*args, **kwargs)
+app\splitest\routes.py:69: in new_test
+    return redirect(url_for('splitest.add_variant', test_id=test.id))
+venv\Lib\site-packages\flask\helpers.py:225: in url_for
+    return current_app.url_for(
+venv\Lib\site-packages\flask\app.py:1697: in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+venv\Lib\site-packages\flask\app.py:1686: in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <werkzeug.routing.map.MapAdapter object at 0x000001FE19646150>
+endpoint = 'splitest.add_variant', values = {'test_id': 2}, method = None
+force_external = False, append_unknown = True, url_scheme = None
+
+    def build(
+        self,
+        endpoint: str,
+        values: t.Mapping[str, t.Any] | None = None,
+        method: str | None = None,
+        force_external: bool = False,
+        append_unknown: bool = True,
+        url_scheme: str | None = None,
+    ) -> str:
+        """Building URLs works pretty much the other way round.  Instead of
+        `match` you call `build` and pass it the endpoint and a dict of
+        arguments for the placeholders.
+    
+        The `build` function also accepts an argument called `force_external`
+        which, if you set it to `True` will force external URLs. Per default
+        external URLs (include the server name) will only be used if the
+        target URL is on a different subdomain.
+    
+        >>> m = Map([
+        ...     Rule('/', endpoint='index'),
+        ...     Rule('/downloads/', endpoint='downloads/index'),
+        ...     Rule('/downloads/<int:id>', endpoint='downloads/show')
+        ... ])
+        >>> urls = m.bind("example.com", "/")
+        >>> urls.build("index", {})
+        '/'
+        >>> urls.build("downloads/show", {'id': 42})
+        '/downloads/42'
+        >>> urls.build("downloads/show", {'id': 42}, force_external=True)
+        'http://example.com/downloads/42'
+    
+        Because URLs cannot contain non ASCII data you will always get
+        bytes back.  Non ASCII characters are urlencoded with the
+        charset defined on the map instance.
+    
+        Additional values are converted to strings and appended to the URL as
+        URL querystring parameters:
+    
+        >>> urls.build("index", {'q': 'My Searchstring'})
+        '/?q=My+Searchstring'
+    
+        When processing those additional values, lists are furthermore
+        interpreted as multiple values (as per
+        :py:class:`werkzeug.datastructures.MultiDict`):
+    
+        >>> urls.build("index", {'q': ['a', 'b', 'c']})
+        '/?q=a&q=b&q=c'
+    
+        Passing a ``MultiDict`` will also add multiple values:
+    
+        >>> urls.build("index", MultiDict((('p', 'z'), ('q', 'a'), ('q', 'b'))))
+        '/?p=z&q=a&q=b'
+    
+        If a rule does not exist when building a `BuildError` exception is
+        raised.
+    
+        The build method accepts an argument called `method` which allows you
+        to specify the method you want to have an URL built for if you have
+        different methods for the same endpoint specified.
+    
+        :param endpoint: the endpoint of the URL to build.
+        :param values: the values for the URL to build.  Unhandled values are
+                       appended to the URL as query parameters.
+        :param method: the HTTP method for the rule if there are different
+                       URLs for different methods on the same endpoint.
+        :param force_external: enforce full canonical external URLs. If the URL
+                               scheme is not provided, this will generate
+                               a protocol-relative URL.
+        :param append_unknown: unknown parameters are appended to the generated
+                               URL as query string argument.  Disable this
+                               if you want the builder to ignore those.
+        :param url_scheme: Scheme to use in place of the bound
+            :attr:`url_scheme`.
+    
+        .. versionchanged:: 2.0
+            Added the ``url_scheme`` parameter.
+    
+        .. versionadded:: 0.6
+           Added the ``append_unknown`` parameter.
+        """
+        self.map.update()
+    
+        if values:
+            if isinstance(values, MultiDict):
+                values = {
+                    k: (v[0] if len(v) == 1 else v)
+                    for k, v in dict.items(values)
+                    if len(v) != 0
+                }
+            else:  # plain dict
+                values = {k: v for k, v in values.items() if v is not None}
+        else:
+            values = {}
+    
+        rv = self._partial_build(endpoint, values, method, append_unknown)
+        if rv is None:
+>           raise BuildError(endpoint, values, method, self)
+E           werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'splitest.add_variant' with values ['test_id']. Did you mean 'splitest.add_variant_route' instead?
+
+venv\Lib\site-packages\werkzeug\routing\map.py:950: BuildError
+______________________________ test_add_variant _______________________________
+
+client = <FlaskClient <Flask 'app'>>
+auth = <conftest.auth.<locals>.AuthActions object at 0x000001FE1B5E1A90>
+
+    def test_add_variant(client, auth):
+        """Test adding a variant to a split test."""
+        auth.login()
+    
+        # Create a content version to use
+        with client.application.app_context():
+            from app import db
+            from app.content.models import ContentVersion
+    
+            content_version = ContentVersion(
+                page_id=2,  # About page
+                content_hash='test123',
+                content_json='{"#title": "About Us Variant"}',
+                version_type='content',
+                created_by=1,  # Admin user
+                is_active=False
+            )
+    
+            db.session.add(content_version)
+            db.session.commit()
+    
+            version_id = content_version.id
+    
+        # First create a test
+>       response = client.post(
+            '/splitest/test/new/2',  # Create test for About page
+            data={
+                'name': 'About Page Test 2',
+                'test_type': 'content',
+                'goal_page_id': '3'  # Contact page is goal
+            },
+            follow_redirects=True
+        )
+
+tests\test_splitest.py:83: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+venv\Lib\site-packages\werkzeug\test.py:1248: in post
+    return self.open(*args, **kw)
+venv\Lib\site-packages\flask\testing.py:232: in open
+    response = super().open(
+venv\Lib\site-packages\werkzeug\test.py:1197: in open
+    response = self.run_wsgi_app(request.environ, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1069: in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1345: in run_wsgi_app
+    app_rv = app(environ, start_response)
+venv\Lib\site-packages\flask\app.py:2213: in __call__
+    return self.wsgi_app(environ, start_response)
+venv\Lib\site-packages\flask\app.py:2193: in wsgi_app
+    response = self.handle_exception(e)
+venv\Lib\site-packages\flask\app.py:2190: in wsgi_app
+    response = self.full_dispatch_request()
+venv\Lib\site-packages\flask\app.py:1486: in full_dispatch_request
+    rv = self.handle_user_exception(e)
+venv\Lib\site-packages\flask\app.py:1484: in full_dispatch_request
+    rv = self.dispatch_request()
+venv\Lib\site-packages\flask\app.py:1469: in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+venv\Lib\site-packages\flask_login\utils.py:290: in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+app\auth\routes.py:31: in decorated_function
+    return f(*args, **kwargs)
+app\splitest\routes.py:69: in new_test
+    return redirect(url_for('splitest.add_variant', test_id=test.id))
+venv\Lib\site-packages\flask\helpers.py:225: in url_for
+    return current_app.url_for(
+venv\Lib\site-packages\flask\app.py:1697: in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+venv\Lib\site-packages\flask\app.py:1686: in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <werkzeug.routing.map.MapAdapter object at 0x000001FE1B5E2780>
+endpoint = 'splitest.add_variant', values = {'test_id': 2}, method = None
+force_external = False, append_unknown = True, url_scheme = None
+
+    def build(
+        self,
+        endpoint: str,
+        values: t.Mapping[str, t.Any] | None = None,
+        method: str | None = None,
+        force_external: bool = False,
+        append_unknown: bool = True,
+        url_scheme: str | None = None,
+    ) -> str:
+        """Building URLs works pretty much the other way round.  Instead of
+        `match` you call `build` and pass it the endpoint and a dict of
+        arguments for the placeholders.
+    
+        The `build` function also accepts an argument called `force_external`
+        which, if you set it to `True` will force external URLs. Per default
+        external URLs (include the server name) will only be used if the
+        target URL is on a different subdomain.
+    
+        >>> m = Map([
+        ...     Rule('/', endpoint='index'),
+        ...     Rule('/downloads/', endpoint='downloads/index'),
+        ...     Rule('/downloads/<int:id>', endpoint='downloads/show')
+        ... ])
+        >>> urls = m.bind("example.com", "/")
+        >>> urls.build("index", {})
+        '/'
+        >>> urls.build("downloads/show", {'id': 42})
+        '/downloads/42'
+        >>> urls.build("downloads/show", {'id': 42}, force_external=True)
+        'http://example.com/downloads/42'
+    
+        Because URLs cannot contain non ASCII data you will always get
+        bytes back.  Non ASCII characters are urlencoded with the
+        charset defined on the map instance.
+    
+        Additional values are converted to strings and appended to the URL as
+        URL querystring parameters:
+    
+        >>> urls.build("index", {'q': 'My Searchstring'})
+        '/?q=My+Searchstring'
+    
+        When processing those additional values, lists are furthermore
+        interpreted as multiple values (as per
+        :py:class:`werkzeug.datastructures.MultiDict`):
+    
+        >>> urls.build("index", {'q': ['a', 'b', 'c']})
+        '/?q=a&q=b&q=c'
+    
+        Passing a ``MultiDict`` will also add multiple values:
+    
+        >>> urls.build("index", MultiDict((('p', 'z'), ('q', 'a'), ('q', 'b'))))
+        '/?p=z&q=a&q=b'
+    
+        If a rule does not exist when building a `BuildError` exception is
+        raised.
+    
+        The build method accepts an argument called `method` which allows you
+        to specify the method you want to have an URL built for if you have
+        different methods for the same endpoint specified.
+    
+        :param endpoint: the endpoint of the URL to build.
+        :param values: the values for the URL to build.  Unhandled values are
+                       appended to the URL as query parameters.
+        :param method: the HTTP method for the rule if there are different
+                       URLs for different methods on the same endpoint.
+        :param force_external: enforce full canonical external URLs. If the URL
+                               scheme is not provided, this will generate
+                               a protocol-relative URL.
+        :param append_unknown: unknown parameters are appended to the generated
+                               URL as query string argument.  Disable this
+                               if you want the builder to ignore those.
+        :param url_scheme: Scheme to use in place of the bound
+            :attr:`url_scheme`.
+    
+        .. versionchanged:: 2.0
+            Added the ``url_scheme`` parameter.
+    
+        .. versionadded:: 0.6
+           Added the ``append_unknown`` parameter.
+        """
+        self.map.update()
+    
+        if values:
+            if isinstance(values, MultiDict):
+                values = {
+                    k: (v[0] if len(v) == 1 else v)
+                    for k, v in dict.items(values)
+                    if len(v) != 0
+                }
+            else:  # plain dict
+                values = {k: v for k, v in values.items() if v is not None}
+        else:
+            values = {}
+    
+        rv = self._partial_build(endpoint, values, method, append_unknown)
+        if rv is None:
+>           raise BuildError(endpoint, values, method, self)
+E           werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'splitest.add_variant' with values ['test_id']. Did you mean 'splitest.add_variant_route' instead?
+
+venv\Lib\site-packages\werkzeug\routing\map.py:950: BuildError
+____________________________ test_start_stop_test _____________________________
+
+client = <FlaskClient <Flask 'app'>>
+auth = <conftest.auth.<locals>.AuthActions object at 0x000001FE19AE6B70>
+
+    def test_start_stop_test(client, auth):
+        """Test starting and stopping a split test."""
+        auth.login()
+    
+        # Create test with two variants
+        with client.application.app_context():
+            from app import db
+            from app.content.models import ContentVersion
+    
+            # Create two content versions
+            version1 = ContentVersion(
+                page_id=2,  # About page
+                content_hash='version1',
+                content_json='{"#title": "About Us Version 1"}',
+                version_type='content',
+                created_by=1,
+                is_active=False
+            )
+    
+            version2 = ContentVersion(
+                page_id=2,  # About page
+                content_hash='version2',
+                content_json='{"#title": "About Us Version 2"}',
+                version_type='content',
+                created_by=1,
+                is_active=False
+            )
+    
+            db.session.add_all([version1, version2])
+            db.session.commit()
+    
+            # Create test
+            test = create_split_test(
+                page_id=2,
+                name='Start/Stop Test',
+                test_type='content',
+                goal_page_id=3,
+                user_id=1
+            )
+    
+            # Add variants
+            add_variant(test.id, 'Control', version1.id, 1)
+            add_variant(test.id, 'Variant B', version2.id, 1)
+    
+            # Set as inactive initially
+            test.is_active = False
+            db.session.commit()
+    
+            test_id = test.id
+    
+        # Start the test
+>       response = client.post(
+            f'/splitest/test/{test_id}/start',
+            follow_redirects=True
+        )
+
+tests\test_splitest.py:168: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+venv\Lib\site-packages\werkzeug\test.py:1248: in post
+    return self.open(*args, **kw)
+venv\Lib\site-packages\flask\testing.py:232: in open
+    response = super().open(
+venv\Lib\site-packages\werkzeug\test.py:1231: in open
+    response = self.resolve_redirect(response, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1137: in resolve_redirect
+    return self.open(builder, buffered=buffered)
+venv\Lib\site-packages\flask\testing.py:232: in open
+    response = super().open(
+venv\Lib\site-packages\werkzeug\test.py:1197: in open
+    response = self.run_wsgi_app(request.environ, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1069: in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+venv\Lib\site-packages\werkzeug\test.py:1345: in run_wsgi_app
+    app_rv = app(environ, start_response)
+venv\Lib\site-packages\flask\app.py:2213: in __call__
+    return self.wsgi_app(environ, start_response)
+venv\Lib\site-packages\flask\app.py:2193: in wsgi_app
+    response = self.handle_exception(e)
+venv\Lib\site-packages\flask\app.py:2190: in wsgi_app
+    response = self.full_dispatch_request()
+venv\Lib\site-packages\flask\app.py:1486: in full_dispatch_request
+    rv = self.handle_user_exception(e)
+venv\Lib\site-packages\flask\app.py:1484: in full_dispatch_request
+    rv = self.dispatch_request()
+venv\Lib\site-packages\flask\app.py:1469: in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+venv\Lib\site-packages\flask_login\utils.py:290: in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+app\splitest\routes.py:83: in test_detail
+    return render_template('splitest/test_detail.html', title=test.name, test=test,
+venv\Lib\site-packages\flask\templating.py:150: in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+venv\Lib\site-packages\jinja2\environment.py:1087: in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+venv\Lib\site-packages\jinja2\environment.py:1016: in get_template
+    return self._load_template(name, globals)
+venv\Lib\site-packages\jinja2\environment.py:975: in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+venv\Lib\site-packages\jinja2\loaders.py:126: in load
+    source, filename, uptodate = self.get_source(environment, name)
+venv\Lib\site-packages\flask\templating.py:64: in get_source
+    return self._get_source_fast(environment, template)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <flask.templating.DispatchingJinjaLoader object at 0x000001FE1B41B3B0>
+environment = <flask.templating.Environment object at 0x000001FE1977C920>
+template = 'splitest/test_detail.html'
+
+    def _get_source_fast(
+        self, environment: Environment, template: str
+    ) -> tuple[str, str | None, t.Callable | None]:
+        for _srcobj, loader in self._iter_loaders(template):
+            try:
+                return loader.get_source(environment, template)
+            except TemplateNotFound:
+                continue
+>       raise TemplateNotFound(template)
+E       jinja2.exceptions.TemplateNotFound: splitest/test_detail.html
+
+venv\Lib\site-packages\flask\templating.py:98: TemplateNotFound
+_____________________________ test_get_visitor_id _____________________________
+
+    def test_get_visitor_id():
+        """Test getting a visitor ID from a request."""
+        from flask import Request
+        from werkzeug.test import EnvironBuilder
+    
+        # Create a test request with no cookie
+        builder = EnvironBuilder()
+        env = builder.get_environ()
+        request = Request(env)
+    
+        # First call should generate a new ID
+>       visitor_id = get_visitor_id(request)
+
+tests\test_splitest.py:204: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+app\utils.py:19: in get_visitor_id
+    visitor_id = request.cookies.get('visitor_id')
+venv\Lib\site-packages\werkzeug\local.py:311: in __get__
+    obj = instance._get_current_object()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _get_current_object() -> T:
+        try:
+            obj = local.get()
+        except LookupError:
+>           raise RuntimeError(unbound_message) from None
+E           RuntimeError: Working outside of request context.
+E           
+E           This typically means that you attempted to use functionality that needed
+E           an active HTTP request. Consult the documentation on testing for
+E           information about how to avoid this problem.
+
+venv\Lib\site-packages\werkzeug\local.py:508: RuntimeError
+____________________________ test_api_get_variant _____________________________
+
+client = <FlaskClient <Flask 'app'>>
+
+    def test_api_get_variant(client):
+        """Test API endpoint to get a split test variant."""
+        response = client.get('/api/test/variant?page_id=1&test_type=content')
+    
+>       assert response.status_code == 200
+E       assert 404 == 200
+E        +  where 404 = <WrapperTestResponse streamed [404 NOT FOUND]>.status_code
+
+tests\test_splitest.py:272: AssertionError
+_________________________ test_api_record_conversion __________________________
+
+client = <FlaskClient <Flask 'app'>>
+
+    def test_api_record_conversion(client):
+        """Test API endpoint to record a conversion."""
+        # First create a test visitor session
+        with client.application.app_context():
+            from app import db
+    
+            # Get test and variant
+            test = SplitTest.query.get(1)
+            variant = TestVariant.query.filter_by(test_id=test.id).first()
+    
+            # Create visitor session
+            visitor_id = "api_test_visitor"
+            session = VisitorSession(
+                split_test_id=test.id,
+                variant_id=variant.id,
+                visitor_id=visitor_id
+            )
+            db.session.add(session)
+            db.session.commit()
+    
+        # Set visitor cookie
+        client.set_cookie('localhost', 'visitor_id', visitor_id)
+    
+        # Record conversion
+        response = client.post(
+            '/api/test/conversion',
+            json={
+                'test_id': 1,
+>               'variant_id': variant.id
+            }
+        )
+
+tests\test_splitest.py:309: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+venv\Lib\site-packages\sqlalchemy\orm\attributes.py:566: in __get__
+    return self.impl.get(state, dict_)  # type: ignore[no-any-return]
+venv\Lib\site-packages\sqlalchemy\orm\attributes.py:1086: in get
+    value = self._fire_loader_callables(state, key, passive)
+venv\Lib\site-packages\sqlalchemy\orm\attributes.py:1116: in _fire_loader_callables
+    return state._load_expired(state, passive)
+venv\Lib\site-packages\sqlalchemy\orm\state.py:803: in _load_expired
+    self.manager.expired_attribute_loader(self, toload, passive)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+mapper = <Mapper at 0x1fe6a8088c0; TestVariant>
+state = <sqlalchemy.orm.state.InstanceState object at 0x000001FE1B1A0950>
+attribute_names = {'content_version', 'content_version_id', 'conversions', 'created_at', 'id', 'name', ...}
+passive = symbol('PASSIVE_OFF')
+
+    def load_scalar_attributes(mapper, state, attribute_names, passive):
+        """initiate a column-based attribute refresh operation."""
+    
+        # assert mapper is _state_mapper(state)
+        session = state.session
+        if not session:
+>           raise orm_exc.DetachedInstanceError(
+                "Instance %s is not bound to a Session; "
+                "attribute refresh operation cannot proceed" % (state_str(state))
+            )
+E           sqlalchemy.orm.exc.DetachedInstanceError: Instance <TestVariant at 0x1fe19c61f70> is not bound to a Session; attribute refresh operation cannot proceed (Background on this error at: https://sqlalche.me/e/20/bhk3)
+
+venv\Lib\site-packages\sqlalchemy\orm\loading.py:1603: DetachedInstanceError
+___________________ test_calculate_statistical_significance ___________________
+
+app = <Flask 'app'>
+
+    def test_calculate_statistical_significance(app):
+        """Test calculation of statistical significance for test results."""
+        with app.app_context():
+            from app import db
+    
+            # Create a test with some data
+            test = SplitTest.query.get(1)
+            variants = test.variants.all()
+    
+            # Add some fake visitor sessions and conversions
+            for i in range(100):
+                # Control variant: 20% conversion
+                session1 = VisitorSession(
+                    split_test_id=test.id,
+                    variant_id=variants[0].id,
+                    visitor_id=f"stat_visitor_control_{i}"
+                )
+                db.session.add(session1)
+    
+                if i < 20:  # 20% conversion rate
+                    conversion1 = Conversion(
+                        split_test_id=test.id,
+                        variant_id=variants[0].id,
+                        visitor_id=f"stat_visitor_control_{i}"
+                    )
+                    db.session.add(conversion1)
+    
+                # Test variant: 30% conversion
+                session2 = VisitorSession(
+                    split_test_id=test.id,
+                    variant_id=variants[1].id,
+                    visitor_id=f"stat_visitor_test_{i}"
+                )
+                db.session.add(session2)
+    
+                if i < 30:  # 30% conversion rate
+                    conversion2 = Conversion(
+                        split_test_id=test.id,
+                        variant_id=variants[1].id,
+                        visitor_id=f"stat_visitor_test_{i}"
+                    )
+                    db.session.add(conversion2)
+    
+            db.session.commit()
+    
+            # Calculate significance
+            results = calculate_statistical_significance(test.id)
+    
+            assert results is not None
+            assert len(results) == 2
+    
+            # Check results for control
+            assert results[0]['visitors'] == 100
+            assert results[0]['conversions'] == 20
+            assert results[0]['conversion_rate'] == 20.0
+    
+            # Check results for test variant
+            assert results[1]['visitors'] == 100
+            assert results[1]['conversions'] == 30
+            assert results[1]['conversion_rate'] == 30.0
+>           assert 'relative_improvement' in results[1]
+E           AssertionError: assert 'relative_improvement' in {'confidence_interval': [21.89475386622812, 39.585038432811956], 'conversion_rate': 30.0, 'conversions': 30, 'name': 'Variation', ...}
+
+tests\test_splitest.py:387: AssertionError
+============================== warnings summary ===============================
+venv\Lib\site-packages\flask_ckeditor\__init__.py:12
+venv\Lib\site-packages\flask_ckeditor\__init__.py:12
+  C:\Users\pc\Programming Projects\streamlined-cms\venv\Lib\site-packages\flask_ckeditor\__init__.py:12: DeprecationWarning: 'flask.Markup' is deprecated and will be removed in Flask 2.4. Import 'markupsafe.Markup' instead.
+    from flask import current_app, Markup, Blueprint, url_for, request, jsonify, render_template_string
+
+app\splitest\models.py:89
+  C:\Users\pc\Programming Projects\streamlined-cms\app\splitest\models.py:89: PytestCollectionWarning: cannot collect test class 'TestVariant' because it has a __init__ constructor (from: tests/test_integration.py)
+    class TestVariant(db.Model):
+
+app\splitest\models.py:89
+  C:\Users\pc\Programming Projects\streamlined-cms\app\splitest\models.py:89: PytestCollectionWarning: cannot collect test class 'TestVariant' because it has a __init__ constructor (from: tests/test_splitest.py)
+    class TestVariant(db.Model):
+
+tests/test_analytics.py: 311 warnings
+tests/test_auth.py: 181 warnings
+tests/test_content.py: 163 warnings
+tests/test_integration.py: 36 warnings
+tests/test_splitest.py: 449 warnings
+  C:\Users\pc\Programming Projects\streamlined-cms\venv\Lib\site-packages\sqlalchemy\sql\schema.py:3616: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return util.wrap_callable(lambda ctx: fn(), fn)  # type: ignore
+
+tests/test_analytics.py::test_get_page_views_by_date
+  C:\Users\pc\Programming Projects\streamlined-cms\tests\test_analytics.py:54: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    today = datetime.utcnow().date()
+
+tests/test_analytics.py::test_get_page_views_by_date
+tests/test_analytics.py::test_get_page_views_by_date
+tests/test_analytics.py::test_get_page_views_by_date
+tests/test_analytics.py::test_get_page_views_by_date
+tests/test_analytics.py::test_get_page_views_by_date
+  C:\Users\pc\Programming Projects\streamlined-cms\tests\test_analytics.py:63: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    created_at=datetime.utcnow()
+
+tests/test_analytics.py::test_get_page_views_by_date
+tests/test_analytics.py::test_get_page_views_by_date
+tests/test_analytics.py::test_get_page_views_by_date
+  C:\Users\pc\Programming Projects\streamlined-cms\tests\test_analytics.py:72: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    created_at=datetime.utcnow() - timedelta(days=1)
+
+tests/test_analytics.py::test_get_page_views_by_date
+tests/test_analytics.py::test_get_page_views_by_date
+  C:\Users\pc\Programming Projects\streamlined-cms\tests\test_analytics.py:81: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    created_at=datetime.utcnow() - timedelta(days=2)
+
+tests/test_analytics.py::test_get_page_views_by_date
+tests/test_analytics.py::test_page_stats_page
+  C:\Users\pc\Programming Projects\streamlined-cms\app\analytics\utils.py:73: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    start_date = datetime.utcnow() - timedelta(days=days)
+
+tests/test_analytics.py::test_get_page_views_by_date
+tests/test_analytics.py::test_page_stats_page
+  C:\Users\pc\Programming Projects\streamlined-cms\app\analytics\utils.py:91: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    end_date = datetime.utcnow().date()
+
+tests/test_analytics.py::test_get_test_results
+  C:\Users\pc\Programming Projects\streamlined-cms\tests\test_analytics.py:103: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    test = SplitTest.query.get(1)
+
+tests/test_analytics.py::test_get_test_results
+tests/test_analytics.py::test_test_stats_page
+  C:\Users\pc\Programming Projects\streamlined-cms\app\analytics\utils.py:109: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    test = SplitTest.query.get(test_id)
+
+tests/test_analytics.py: 60 warnings
+  C:\Users\pc\Programming Projects\streamlined-cms\tests\test_analytics.py:190: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    created_at=datetime.utcnow() - timedelta(days=i % 3)
+
+tests/test_analytics.py::test_get_website_stats
+tests/test_analytics.py::test_website_stats_page
+  C:\Users\pc\Programming Projects\streamlined-cms\app\analytics\utils.py:201: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    start_date = datetime.utcnow() - timedelta(days=days)
+
+tests/test_analytics.py::test_get_website_stats
+tests/test_analytics.py::test_website_stats_page
+  C:\Users\pc\Programming Projects\streamlined-cms\app\analytics\utils.py:239: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    end_date = datetime.utcnow().date()
+
+tests/test_analytics.py: 6 warnings
+tests/test_auth.py: 7 warnings
+tests/test_content.py: 9 warnings
+tests/test_integration.py: 2 warnings
+tests/test_splitest.py: 5 warnings
+  C:\Users\pc\Programming Projects\streamlined-cms\app\auth\routes.py:49: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    user.last_login = datetime.utcnow()
+
+tests/test_analytics.py::test_website_stats_page
+tests/test_analytics.py::test_page_stats_page
+tests/test_analytics.py::test_export_test_data
+tests/test_splitest.py::test_test_detail
+tests/test_splitest.py::test_create_test
+tests/test_splitest.py::test_add_variant
+tests/test_splitest.py::test_start_stop_test
+tests/test_splitest.py::test_start_stop_test
+  C:\Users\pc\Programming Projects\streamlined-cms\venv\Lib\site-packages\flask_sqlalchemy\query.py:30: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    rv = self.get(ident)
+
+tests/test_analytics.py::test_page_stats_page
+  C:\Users\pc\Programming Projects\streamlined-cms\app\analytics\routes.py:58: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    start_date = datetime.utcnow() - timedelta(days=days)
+
+tests/test_content.py::test_content_version_activation
+  C:\Users\pc\Programming Projects\streamlined-cms\tests\test_content.py:199: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    page = Page.query.get(1)
+
+tests/test_content.py::test_content_version_activation
+  C:\Users\pc\Programming Projects\streamlined-cms\app\auth\models.py:55: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    return User.query.get(int(user_id))
+
+tests/test_splitest.py::test_test_detail
+tests/test_splitest.py::test_start_stop_test
+tests/test_splitest.py::test_calculate_statistical_significance
+  C:\Users\pc\Programming Projects\streamlined-cms\app\splitest\utils.py:151: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    test = SplitTest.query.get(test_id)
+
+tests/test_splitest.py::test_create_test
+tests/test_splitest.py::test_add_variant
+  C:\Users\pc\Programming Projects\streamlined-cms\app\splitest\routes.py:54: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    goal_page = Page.query.get(goal_page_id)
+
+tests/test_splitest.py::test_start_stop_test
+  C:\Users\pc\Programming Projects\streamlined-cms\app\splitest\routes.py:138: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    test.start_date = datetime.utcnow()
+
+tests/test_splitest.py::test_assign_variant
+  C:\Users\pc\Programming Projects\streamlined-cms\tests\test_splitest.py:224: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    test = SplitTest.query.get(1)
+
+tests/test_splitest.py::test_record_conversion
+  C:\Users\pc\Programming Projects\streamlined-cms\tests\test_splitest.py:251: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    test = SplitTest.query.get(1)
+
+tests/test_splitest.py::test_api_record_conversion
+  C:\Users\pc\Programming Projects\streamlined-cms\tests\test_splitest.py:288: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    test = SplitTest.query.get(1)
+
+tests/test_splitest.py::test_api_record_conversion
+  C:\Users\pc\Programming Projects\streamlined-cms\tests\test_splitest.py:302: DeprecationWarning: The first parameter 'server_name' is no longer used, and will be removed in Werkzeug 3.0. The positional parameters are 'key' and 'value'. Use the 'domain' and 'origin_only' parameters instead.
+    client.set_cookie('localhost', 'visitor_id', visitor_id)
+
+tests/test_splitest.py::test_calculate_statistical_significance
+  C:\Users\pc\Programming Projects\streamlined-cms\tests\test_splitest.py:333: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    test = SplitTest.query.get(1)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_analytics.py::test_get_website_stats - AssertionError: asse...
+FAILED tests/test_analytics.py::test_analytics_dashboard - jinja2.exceptions....
+FAILED tests/test_analytics.py::test_website_stats_page - jinja2.exceptions.T...
+FAILED tests/test_analytics.py::test_page_stats_page - jinja2.exceptions.Temp...
+FAILED tests/test_analytics.py::test_test_stats_page - jinja2.exceptions.Temp...
+FAILED tests/test_analytics.py::test_api_record_view - assert 404 == 200
+FAILED tests/test_analytics.py::test_export_test_data - AssertionError: asser...
+FAILED tests/test_analytics.py::test_access_control - jinja2.exceptions.Templ...
+FAILED tests/test_auth.py::test_login_success - AssertionError: assert '/cont...
+FAILED tests/test_auth.py::test_login_incorrect_password - assert b'Invalid u...
+FAILED tests/test_auth.py::test_login_invalid_username - assert b'Invalid use...
+FAILED tests/test_auth.py::test_register_user - AssertionError: assert '/auth...
+FAILED tests/test_auth.py::test_change_password - AssertionError: assert '/co...
+FAILED tests/test_auth.py::test_change_password_wrong_current - jinja2.except...
+FAILED tests/test_content.py::test_website_detail - assert 404 == 200
+FAILED tests/test_content.py::test_create_website - assert b'Website New Webs...
+FAILED tests/test_content.py::test_create_page - assert b'Page New Page creat...
+FAILED tests/test_content.py::test_api_get_page_content - assert 404 == 200
+FAILED tests/test_content.py::test_api_save_page_content - assert 404 == 200
+FAILED tests/test_content.py::test_page_detail - assert 404 == 200
+FAILED tests/test_content.py::test_edit_page - assert 404 == 200
+FAILED tests/test_content.py::test_content_version_activation - assert b'Cont...
+FAILED tests/test_integration.py::test_end_to_end_flow - assert b'Website Int...
+FAILED tests/test_integration.py::test_different_user_roles - jinja2.exceptio...
+FAILED tests/test_splitest.py::test_test_list - jinja2.exceptions.TemplateNot...
+FAILED tests/test_splitest.py::test_test_detail - jinja2.exceptions.TemplateN...
+FAILED tests/test_splitest.py::test_create_test - werkzeug.routing.exceptions...
+FAILED tests/test_splitest.py::test_add_variant - werkzeug.routing.exceptions...
+FAILED tests/test_splitest.py::test_start_stop_test - jinja2.exceptions.Templ...
+FAILED tests/test_splitest.py::test_get_visitor_id - RuntimeError: Working ou...
+FAILED tests/test_splitest.py::test_api_get_variant - assert 404 == 200
+FAILED tests/test_splitest.py::test_api_record_conversion - sqlalchemy.orm.ex...
+FAILED tests/test_splitest.py::test_calculate_statistical_significance - Asse...
+================ 33 failed, 13 passed, 1277 warnings in 33.98s ================

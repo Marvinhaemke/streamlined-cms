@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block title %}{{ test.name }} - Split Test - Streamlined CMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>{{ test.name }}</h1>
+        <div class="d-flex align-items-center">
+            <h5 class="text-muted mr-3">{{ test.page.website.domain }}{{ test.page.path }}</h5>
+            {% if test.is_active %}
+            <span class="badge badge-success">Active</span>
+            {% else %}
+            <span class="badge badge-secondary">Inactive</span>
+            {% endif %}
+        </div>
+    </div>
+    <div>
+        <a href="{{ url_for('analytics.test_stats', test_id=test.id) }}" class="btn btn-info mr-2">View Analytics</a>
+        
+        {% if current_user.is_marketer() %}
+            {% if test.is_active %}
+            <form action="{{ url_for('splitest.stop_test', test_id=test.id) }}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-danger">Stop Test</button>
+            </form>
+            {% else %}
+            <form action="{{ url_for('splitest.start_test', test_id=test.id) }}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-success">Start Test</button>
+            </form>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <!-- Test Information -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Test Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Test Type:</strong> {{ test.test_type|capitalize }}</p>
+                <p><strong>Page:</strong> {{ test.page.title }}</p>
+                <p><strong>Goal Page:</strong> {{ test.goal_page.title }}</p>
+                <p><strong>Created By:</strong> {{ test.creator.username }}</p>
+                <p><strong>Created At:</strong> {{ test.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                
+                {% if test.start_date %}
+                <p><strong>Started:</strong> {{ test.start_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                {% endif %}
+                
+                {% if test.end_date %}
+                <p><strong>Ended:</strong> {{ test.end_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                {% endif %}
+                
+                {% if test.is_active %}
+                <div class="alert alert-success">
+                    This test is currently running and collecting data.
+                </div>
+                {% else %}
+                    {% if test.end_date %}
+                    <div class="alert alert-secondary">
+                        This test has been completed.
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        This test is inactive. Start the test to begin collecting data.
+                    </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Test Variants -->
+    <div class="col-md-8 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Test Variants</h5>
+                {% if current_user.is_marketer() and variants|length < 5 %}
+                <a href="{{ url_for('splitest.add_variant_route', test_id=test.id) }}" class="btn btn-sm btn-light">Add Variant</a>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if variants %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Traffic Weight</th>
+                                <th>Content Version</th>
+                                {% if stats %}
+                                <th>Visitors</th>
+                                <th>Conversions</th>
+                                <th>Rate</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for variant in variants %}
+                            <tr>
+                                <td>{{ variant.name }}</td>
+                                <td>{{ variant.weight }}</td>
+                                <td>
+                                    <small class="text-muted">ID: {{ variant.content_version_id }}</small>
+                                </td>
+                                {% if stats %}
+                                    {% for stat in stats %}
+                                        {% if stat.variant_id == variant.id %}
+                                        <td>{{ stat.visitors }}</td>
+                                        <td>{{ stat.conversions }}</td>
+                                        <td>{{ "%.2f"|format(stat.conversion_rate) }}%</td>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">No variants have been added to this test yet.</p>
+                {% if current_user.is_marketer() %}
+                <a href="{{ url_for('splitest.add_variant_route', test_id=test.id) }}" class="btn btn-primary">Add Variant</a>
+                {% endif %}
+                {% endif %}
+                
+                {% if current_user.is_marketer() and variants|length >= 2 and not test.is_active %}
+                <div class="alert alert-info mt-3">
+                    <p>This test has {{ variants|length }} variants and is ready to start.</p>
+                    <form action="{{ url_for('splitest.start_test', test_id=test.id) }}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-success">Start Test</button>
+                    </form>
+                </div>
+                {% endif %}
+                
+                {% if current_user.is_marketer() and variants|length < 2 %}
+                <div class="alert alert-warning mt-3">
+                    <p>At least 2 variants are required to run a split test.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Test Results -->
+    {% if stats %}
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Test Results</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <canvas id="conversionChart" height="100"></canvas>
+                </div>
+                
+                {% for stat in stats %}
+                <div class="variant-row mb-3 {% if loop.first %}control{% endif %} {% if loop.first == false and stat.significant %}winner{% endif %}">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <h5>{{ stat.name }}</h5>
+                        </div>
+                        <div class="col-md-2">
+                            <strong>Visitors:</strong> {{ stat.visitors }}
+                        </div>
+                        <div class="col-md-2">
+                            <strong>Conversions:</strong> {{ stat.conversions }}
+                        </div>
+                        <div class="col-md-2">
+                            <strong>Rate:</strong> {{ "%.2f"|format(stat.conversion_rate) }}%
+                        </div>
+                        {% if not loop.first and stat.relative_improvement is defined %}
+                        <div class="col-md-3">
+                            <strong>Improvement:</strong> 
+                            <span class="{% if stat.relative_improvement > 0 %}text-success{% else %}text-danger{% endif %}">
+                                {{ "%.2f"|format(stat.relative_improvement) }}%
+                            </span>
+                            {% if stat.significant %}
+                            <span class="badge badge-success">Significant</span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="progress mt-2">
+                        <div class="progress-bar" style="width: {{ stat.conversion_rate }}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+                
+                <div class="alert alert-info mt-3">
+                    <p>View detailed analytics for more insights:</p>
+                    <a href="{{ url_for('analytics.test_stats', test_id=test.id) }}" class="btn btn-info">View Detailed Analytics</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if stats %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Data for conversion chart
+        const labels = [
+            {% for stat in stats %}
+                "{{ stat.name }}",
+            {% endfor %}
+        ];
+        
+        const conversionRates = [
+            {% for stat in stats %}
+                {{ stat.conversion_rate }},
+            {% endfor %}
+        ];
+        
+        const backgroundColors = [
+            {% for stat in stats %}
+                {% if loop.first %}
+                    'rgba(108, 117, 125, 0.6)',  // Control variant (gray)
+                {% else %}
+                    {% if stat.significant is defined and stat.significant %}
+                        'rgba(40, 167, 69, 0.6)',  // Significant improvement (green)
+                    {% else %}
+                        'rgba(0, 123, 255, 0.6)',  // Not significant (blue)
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        ];
+        
+        // Create conversion chart
+        const ctx = document.getElementById('conversionChart').getContext('2d');
+        const conversionChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Conversion Rate (%)',
+                    data: conversionRates,
+                    backgroundColor: backgroundColors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endif %}
+{% endblock %}

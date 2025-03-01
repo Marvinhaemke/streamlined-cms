@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Add Variant - {{ test.name }} - Streamlined CMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Add Variant to {{ test.name }}</h1>
+    <a href="{{ url_for('splitest.test_detail', test_id=test.id) }}" class="btn btn-secondary">Back to Test</a>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">New Variant</h5>
+            </div>
+            <div class="card-body">
+                <form action="" method="post" novalidate>
+                    <div class="form-group">
+                        <label for="name">Variant Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                        <small class="form-text text-muted">Choose a descriptive name for this variant (e.g., "Blue Button", "Short Headline")</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="content_version_id">Content Version</label>
+                        <select class="form-control" id="content_version_id" name="content_version_id" required>
+                            <option value="">-- Select Content Version --</option>
+                            {% for version in versions %}
+                            <option value="{{ version.id }}">
+                                Version {{ version.id }} 
+                                {% if version.is_active %} (Active) {% endif %}
+                                - Created {{ version.created_at.strftime('%Y-%m-%d') }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <small class="form-text text-muted">Select the content version to use for this variant.</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="weight">Traffic Weight</label>
+                        <input type="number" class="form-control" id="weight" name="weight" value="1" min="1" max="10">
+                        <small class="form-text text-muted">Higher weight means more traffic (relative to other variants).</small>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Add Variant</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Test Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Test Name:</strong> {{ test.name }}</p>
+                <p><strong>Page:</strong> {{ page.title }}</p>
+                <p><strong>Test Type:</strong> {{ test.test_type|capitalize }}</p>
+                <p><strong>Current Variants:</strong> {{ test.variants.count() }}</p>
+                
+                <div class="alert alert-info mt-3">
+                    <h6>Creating a New Variant</h6>
+                    <p>Before adding a variant:</p>
+                    <ol>
+                        <li>Create a new content version with your changes</li>
+                        <li>Select that content version here</li>
+                        <li>Add a clear name that describes this variant</li>
+                    </ol>
+                    
+                    {% if test.variants.count() == 0 %}
+                    <p><strong>Note:</strong> The first variant is typically the "Control" version.</p>
+                    {% endif %}
+                    
+                    <p><strong>Tip:</strong> You need at least 2 variants to run a test.</p>
+                </div>
+                
+                {% if versions|length == 0 %}
+                <div class="alert alert-warning">
+                    <p><strong>No content versions found!</strong></p>
+                    <p>You need to create at least one content version before adding a variant.</p>
+                    <a href="{{ url_for('content.page_detail', page_id=page.id) }}" class="btn btn-primary">Go to Page</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
