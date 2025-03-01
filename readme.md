@@ -1,4 +1,4 @@
-# Streamlined CMS
+# Streamlined CMS (Very Early Development Prototype/not yet usable)
 
 A simple, lightweight content management system that allows marketers to easily edit website content and run split tests without developer intervention.
 
